@@ -5,327 +5,149 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Spex v4</title>
   
-  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
-  
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-</head>
-<body>
-  <div id="root"></div>
-
-  <script type="text/babel" data-type="module">
-    const { useState, useEffect, useRef } = React;
-
-    // ── STYLES ────────────────────────────────────────────────────────────────────
-    const STYLES = `
+  <style>
     @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=IBM+Plex+Sans:wght@300;400;500&display=swap');
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-    --bg: #0a0a0b;
-    --surface: #111113;
-    --surface2: #18181b;
-    --surface3: #222226;
-    --border: #2a2a30;
-    --border2: #3a3a42;
-    --text: #e8e8ec;
-    --text2: #9090a0;
-    --text3: #55556a;
-    --accent: #4fc3a1;
-    --accent2: #2a7a64;
-    --warn: #e8a44a;
-    --danger: #e85a4a;
-    --mission: #7a8fe8;
-    --mono: 'IBM Plex Mono', monospace;
-    --sans: 'IBM Plex Sans', sans-serif;
+      --bg: #0a0a0b; --surface: #111113; --surface2: #18181b; --surface3: #222226;
+      --border: #2a2a30; --border2: #3a3a42; --text: #e8e8ec; --text2: #9090a0; --text3: #55556a;
+      --accent: #4fc3a1; --accent2: #2a7a64; --warn: #e8a44a; --danger: #e85a4a; --mission: #7a8fe8;
+      --mono: 'IBM Plex Mono', monospace; --sans: 'IBM Plex Sans', sans-serif;
     }
 
-    html, body { background: var(--bg); color: var(--text); font-family: var(--mono);
-    min-height: 100vh; }
-
-    #root { max-width: 480px; margin: 0 auto; min-height: 100vh; display: flex; flex-direction: column;
-    }
-
-    /* HEADER */
-    .header {
-    padding: 14px 16px 10px;
-    border-bottom: 1px solid var(--border);
-    display: flex; align-items: center; justify-content: space-between;
-    position: sticky;
-    top: 0; z-index: 100; background: var(--bg);
-    }
+    html, body { background: var(--bg); color: var(--text); font-family: var(--mono); min-height: 100vh; }
+    #root { max-width: 480px; margin: 0 auto; min-height: 100vh; display: flex; flex-direction: column; }
+    
+    .header { padding: 14px 16px 10px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; background: var(--bg); }
     .header-left { display: flex; align-items: center; gap: 10px; }
     .header-logo { width: 26px; height: 26px; border-radius: 4px; object-fit: cover; }
-    .header-title { font-size: 11px; font-weight: 600; letter-spacing: 0.18em; color: var(--accent); text-transform: uppercase;
-    }
+    .header-title { font-size: 11px; font-weight: 600; letter-spacing: 0.18em; color: var(--accent); text-transform: uppercase; }
     .header-day { font-size: 10px; color: var(--text3); letter-spacing: 0.05em; }
-    .er-badge {
-    font-size: 10px; font-weight: 500; padding: 3px 8px;
-    border: 1px solid var(--border2);
-    border-radius: 2px;
-    color: var(--accent); background: var(--surface2);
-    cursor: pointer; letter-spacing: 0.08em;
-    }
-
-    /* TABS */
-    .tabs {
-    display: flex; border-bottom: 1px solid var(--border);
-    background: var(--surface);
-    }
-    .tab {
-    flex: 1; padding: 10px 0; font-size: 10px; font-weight: 500;
-    letter-spacing: 0.12em; text-transform: uppercase; text-align: center;
-    cursor: pointer;
-    color: var(--text3); border: none; background: none;
-    border-bottom: 2px solid transparent; transition: all 0.15s;
-    font-family: var(--mono);
-    }
-    .tab.active { color: var(--accent);
-    border-bottom-color: var(--accent); }
+    .er-badge { font-size: 10px; font-weight: 500; padding: 3px 8px; border: 1px solid var(--border2); border-radius: 2px; color: var(--accent); background: var(--surface2); cursor: pointer; letter-spacing: 0.08em; }
+    
+    .tabs { display: flex; border-bottom: 1px solid var(--border); background: var(--surface); }
+    .tab { flex: 1; padding: 10px 0; font-size: 10px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; text-align: center; cursor: pointer; color: var(--text3); border: none; background: none; border-bottom: 2px solid transparent; transition: all 0.15s; font-family: var(--mono); }
+    .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
     .tab:hover:not(.active) { color: var(--text2); }
-
-    /* MAIN CONTENT */
-    .main { flex: 1; overflow-y: auto; padding: 0 0 120px;
-    }
-
-    /* CAPTURE AREA */
+    
+    .main { flex: 1; overflow-y: auto; padding: 0 0 120px; }
+    
     .capture-zone { padding: 12px 16px; border-bottom: 1px solid var(--border); }
-
-    .capture-input {
-    width: 100%; background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 3px; padding: 10px 12px; color: var(--text);
-    font-family: var(--mono); font-size: 13px; resize: none;
-    min-height: 60px;
-    line-height: 1.5; outline: none;
-    transition: border-color 0.15s;
-    }
+    .capture-input { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 3px; padding: 10px 12px; color: var(--text); font-family: var(--mono); font-size: 13px; resize: none; min-height: 60px; line-height: 1.5; outline: none; transition: border-color 0.15s; }
     .capture-input:focus { border-color: var(--border2); }
     .capture-input::placeholder { color: var(--text3); }
-
-    .capture-btns {
-    display: flex; gap: 6px;
-    margin-top: 8px; flex-wrap: wrap;
-    }
-    .btn {
-    font-family: var(--mono); font-size: 10px; font-weight: 500;
-    letter-spacing: 0.1em; text-transform: uppercase;
-    padding: 5px 10px; border-radius: 2px;
-    cursor: pointer;
-    border: 1px solid; transition: all 0.12s;
-    }
+    .capture-btns { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+    
+    .btn { font-family: var(--mono); font-size: 10px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; padding: 5px 10px; border-radius: 2px; cursor: pointer; border: 1px solid; transition: all 0.12s; }
     .btn-raw { color: var(--text2); border-color: var(--border2); background: var(--surface2); }
-    .btn-raw:hover { color: var(--text);
-    border-color: var(--text3); }
+    .btn-raw:hover { color: var(--text); border-color: var(--text3); }
     .btn-milestone { color: var(--warn); border-color: var(--warn); background: transparent; }
     .btn-milestone:hover { background: rgba(232,164,74,0.08); }
-    .btn-moment { color: var(--accent); border-color: var(--accent);
-    background: transparent; }
+    .btn-moment { color: var(--accent); border-color: var(--accent); background: transparent; }
     .btn-moment:hover { background: rgba(79,195,161,0.08); }
     .btn-marker { color: var(--text2); border-color: var(--border2); background: transparent; }
-    .btn-marker:hover { color: var(--text);
-    }
+    .btn-marker:hover { color: var(--text); }
     .btn-mission { color: var(--mission); border-color: var(--mission); background: transparent; }
     .btn-mission:hover { background: rgba(122,143,232,0.08); }
-    .btn-primary {
-    color: var(--bg); background: var(--accent); border-color: var(--accent);
-    font-weight: 600;
-    }
+    .btn-primary { color: var(--bg); background: var(--accent); border-color: var(--accent); font-weight: 600; }
     .btn-primary:hover { background: #5dd4b0; }
     .btn-danger { color: var(--danger); border-color: var(--danger); background: transparent; }
-    .btn-danger:hover { background: rgba(232,90,74,0.08);
-    }
+    .btn-danger:hover { background: rgba(232,90,74,0.08); }
     .btn-ghost { color: var(--text3); border-color: var(--border); background: transparent; }
     .btn-ghost:hover { color: var(--text2); border-color: var(--border2); }
-
-    /* FEED */
-    .feed { padding: 0;
-    }
+    
+    .feed { padding: 0; }
     .feed-empty { padding: 40px 16px; text-align: center; color: var(--text3); font-size: 11px; letter-spacing: 0.08em; }
-
-    .entry {
-    padding: 10px 16px;
-    border-bottom: 1px solid var(--border);
-    display: flex; gap: 10px; align-items: flex-start;
-    }
+    .entry { padding: 10px 16px; border-bottom: 1px solid var(--border); display: flex; gap: 10px; align-items: flex-start; }
     .entry:hover { background: var(--surface); }
-
-    .entry-type-dot {
-    width: 6px; height: 6px;
-    border-radius: 50%; flex-shrink: 0; margin-top: 5px;
-    }
+    .entry-type-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
     .dot-raw { background: var(--text3); }
     .dot-milestone { background: var(--warn); }
-    .dot-moment { background: var(--accent);
-    }
+    .dot-moment { background: var(--accent); }
     .dot-marker { background: var(--text2); }
     .dot-mission { background: var(--mission); }
     .dot-er { background: #888; }
-
-    .entry-body { flex: 1; min-width: 0;
-    }
+    .entry-body { flex: 1; min-width: 0; }
     .entry-label { font-size: 9px; color: var(--text3); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 2px; }
-    .entry-text { font-size: 12px; color: var(--text); line-height: 1.45;
-    word-break: break-word; }
+    .entry-text { font-size: 12px; color: var(--text); line-height: 1.45; word-break: break-word; }
     .entry-time { font-size: 9px; color: var(--text3); margin-top: 3px; }
-    .entry-delete { font-size: 10px; color: var(--text3); cursor: pointer; padding: 2px;
-    flex-shrink: 0; opacity: 0; transition: opacity 0.15s; }
+    .entry-delete { font-size: 10px; color: var(--text3); cursor: pointer; padding: 2px; flex-shrink: 0; opacity: 0; transition: opacity 0.15s; }
     .entry:hover .entry-delete { opacity: 1; }
-    .entry-delete:hover { color: var(--danger);
-    }
-
-    /* MOMENT OPEN STATE */
-    .moment-banner {
-    margin: 8px 16px; padding: 8px 12px;
-    border: 1px solid var(--accent2); border-radius: 2px;
-    background: rgba(79,195,161,0.04);
-    display: flex; justify-content: space-between; align-items: center;
-    }
+    .entry-delete:hover { color: var(--danger); }
+    
+    .moment-banner { margin: 8px 16px; padding: 8px 12px; border: 1px solid var(--accent2); border-radius: 2px; background: rgba(79,195,161,0.04); display: flex; justify-content: space-between; align-items: center; }
     .moment-banner-text { font-size: 11px; color: var(--accent); }
-    .moment-close-btn { font-size: 10px; color: var(--text2); cursor: pointer;
-    padding: 3px 8px; border: 1px solid var(--border2); border-radius: 2px; background: transparent; font-family: var(--mono); }
-    .moment-close-btn:hover { color: var(--text); border-color: var(--text3);
-    }
-
-    /* SECTION LABEL */
-    .section-label {
-    padding: 8px 16px; font-size: 9px; letter-spacing: 0.15em;
-    text-transform: uppercase; color: var(--text3);
-    border-bottom: 1px solid var(--border);
-    background: var(--surface);
-    display: flex; justify-content: space-between; align-items: center;
-    }
-
-    /* MISSIONS PANEL */
+    .moment-close-btn { font-size: 10px; color: var(--text2); cursor: pointer; padding: 3px 8px; border: 1px solid var(--border2); border-radius: 2px; background: transparent; font-family: var(--mono); }
+    .moment-close-btn:hover { color: var(--text); border-color: var(--text3); }
+    
+    .section-label { padding: 8px 16px; font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text3); border-bottom: 1px solid var(--border); background: var(--surface); display: flex; justify-content: space-between; align-items: center; }
+    
     .mission-list { padding: 8px 16px; }
-    .mission-item {
-    display: flex;
-    justify-content: space-between; align-items: center;
-    padding: 8px 0; border-bottom: 1px solid var(--border);
-    }
+    .mission-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); }
     .mission-item:last-child { border-bottom: none; }
-    .mission-name { font-size: 12px;
-    color: var(--text); }
-    .mission-status {
-    font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase;
-    padding: 2px 7px; border-radius: 2px;
-    }
-    .status-ongoing { color: var(--accent); background: rgba(79,195,161,0.1);
-    }
+    .mission-name { font-size: 12px; color: var(--text); }
+    .mission-status { font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; padding: 2px 7px; border-radius: 2px; }
+    .status-ongoing { color: var(--accent); background: rgba(79,195,161,0.1); }
     .status-paused { color: var(--warn); background: rgba(232,164,74,0.1); }
     .status-completed { color: var(--text3); background: var(--surface2); }
-    .status-launched { color: var(--mission); background: rgba(122,143,232,0.1);
-    }
-
+    .status-launched { color: var(--mission); background: rgba(122,143,232,0.1); }
     .mission-add { display: flex; gap: 6px; margin-top: 10px; }
-    .mission-input {
-    flex: 1; background: var(--surface2); border: 1px solid var(--border);
-    border-radius: 2px;
-    padding: 7px 10px; color: var(--text);
-    font-family: var(--mono); font-size: 12px; outline: none;
-    }
-    .mission-input:focus { border-color: var(--border2);
-    }
-
-    /* ER MODAL */
-    .modal-overlay {
-    position: fixed; inset: 0; background: rgba(0,0,0,0.7);
-    display: flex; align-items: center; justify-content: center; z-index: 200;
-    padding: 16px;
-    }
-    .modal {
-    background: var(--surface); border: 1px solid var(--border2);
-    border-radius: 4px; padding: 20px; width: 100%; max-width: 340px;
-    }
-    .modal-title { font-size: 11px;
-    letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent); margin-bottom: 16px; }
-    .modal-input {
-    width: 100%; background: var(--surface2); border: 1px solid var(--border);
-    border-radius: 2px;
-    padding: 9px 12px; color: var(--text);
-    font-family: var(--mono); font-size: 14px; outline: none; margin-bottom: 12px;
-    }
-    .modal-input:focus { border-color: var(--border2);
-    }
+    .mission-input { flex: 1; background: var(--surface2); border: 1px solid var(--border); border-radius: 2px; padding: 7px 10px; color: var(--text); font-family: var(--mono); font-size: 12px; outline: none; }
+    .mission-input:focus { border-color: var(--border2); }
+    
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 200; padding: 16px; }
+    .modal { background: var(--surface); border: 1px solid var(--border2); border-radius: 4px; padding: 20px; width: 100%; max-width: 340px; }
+    .modal-title { font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent); margin-bottom: 16px; }
+    .modal-input { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 2px; padding: 9px 12px; color: var(--text); font-family: var(--mono); font-size: 14px; outline: none; margin-bottom: 12px; }
+    .modal-input:focus { border-color: var(--border2); }
     .modal-btns { display: flex; gap: 8px; justify-content: flex-end; }
-
-    /* NIGHTLY */
+    
     .nightly-zone { padding: 12px 16px; }
-    .nightly-output {
-    width: 100%; background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 3px; padding: 12px; color: var(--text2);
-    font-family: var(--mono); font-size: 11px; min-height: 200px;
-    resize: none; line-height: 1.65;
-    outline: none;
-    white-space: pre-wrap;
-    }
+    .nightly-output { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 3px; padding: 12px; color: var(--text2); font-family: var(--mono); font-size: 11px; min-height: 200px; resize: none; line-height: 1.65; outline: none; white-space: pre-wrap; }
     .nightly-output:focus { border-color: var(--border2); color: var(--text); }
-    .nightly-actions { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap;
-    }
+    .nightly-actions { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
     .nightly-status { font-size: 10px; color: var(--text3); margin-top: 8px; min-height: 16px; }
-    .nightly-loading { color: var(--accent); animation: pulse 1.2s infinite;
-    }
+    .nightly-loading { color: var(--accent); animation: pulse 1.2s infinite; }
     @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
-
-    /* REHYDRATION */
+    
     .rehydration-zone { padding: 12px 16px; }
-    .rehydration-output {
-    width: 100%; background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 3px; padding: 12px; color: var(--text2);
-    font-family: var(--mono); font-size: 10px; min-height: 160px;
-    resize: none; line-height: 1.65;
-    outline: none;
-    white-space: pre-wrap;
-    }
+    .rehydration-output { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 3px; padding: 12px; color: var(--text2); font-family: var(--mono); font-size: 10px; min-height: 160px; resize: none; line-height: 1.65; outline: none; white-space: pre-wrap; }
     .rehydration-output:focus { border-color: var(--border2); color: var(--text); }
-    .rehydration-type-btns { display: flex; gap: 8px; margin-bottom: 10px;
-    }
-    .rehydration-type-btn {
-    flex: 1; padding: 8px; font-family: var(--mono); font-size: 10px;
-    letter-spacing: 0.1em; text-transform: uppercase; border-radius: 2px;
-    cursor: pointer;
-    border: 1px solid var(--border2); background: var(--surface2);
-    color: var(--text2); transition: all 0.12s;
-    }
-    .rehydration-type-btn.selected { color: var(--accent); border-color: var(--accent); background: rgba(79,195,161,0.06);
-    }
-
-    /* SAVED NIGHTLIES */
+    .rehydration-type-btns { display: flex; gap: 8px; margin-bottom: 10px; }
+    .rehydration-type-btn { flex: 1; padding: 8px; font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; border-radius: 2px; cursor: pointer; border: 1px solid var(--border2); background: var(--surface2); color: var(--text2); transition: all 0.12s; }
+    .rehydration-type-btn.selected { color: var(--accent); border-color: var(--accent); background: rgba(79,195,161,0.06); }
+    
     .nightly-saved-list { padding: 0; }
-    .nightly-saved-item {
-    padding: 10px 16px; border-bottom: 1px solid var(--border);
-    cursor: pointer; transition: background 0.12s;
-    }
+    .nightly-saved-item { padding: 10px 16px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.12s; }
     .nightly-saved-item:hover { background: var(--surface); }
     .nightly-saved-date { font-size: 11px; color: var(--text); margin-bottom: 2px; }
-    .nightly-saved-preview { font-size: 10px; color: var(--text3); white-space: nowrap;
-    overflow: hidden; text-overflow: ellipsis; }
-
-    /* COPY FLASH */
+    .nightly-saved-preview { font-size: 10px; color: var(--text3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    
     .copy-flash { color: var(--accent) !important; }
-
-    /* SUBLOOP MODAL INPUT */
-    .moment-type-btns { display: flex;
-    gap: 6px; margin-bottom: 10px; }
-    .moment-type-btn {
-    flex: 1; padding: 6px; font-family: var(--mono); font-size: 10px;
-    letter-spacing: 0.08em; text-transform: uppercase; border-radius: 2px;
-    cursor: pointer; border: 1px solid var(--border2); background: var(--surface2);
-    color: var(--text2); transition: all 0.12s;
-    }
+    
+    .moment-type-btns { display: flex; gap: 6px; margin-bottom: 10px; }
+    .moment-type-btn { flex: 1; padding: 6px; font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; border-radius: 2px; cursor: pointer; border: 1px solid var(--border2); background: var(--surface2); color: var(--text2); transition: all 0.12s; }
     .moment-type-btn.selected { color: var(--accent); border-color: var(--accent); }
-    `;
+  </style>
 
-    // ── HELPERS ───────────────────────────────────────────────────────────────────
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body>
+  <div id="root">
+    <div style="padding: 20px; color: #9090a0; text-align: center; font-family: monospace; font-size: 12px; margin-top: 40px;">
+      Booting Spex v4...<br><br>If this screen stays here, there is a JS syntax error or a severe browser cache issue.
+    </div>
+  </div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
     function now() { return new Date(); }
-    function ts(d = now()) {
-    return d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
-    }
-    function dateStr(d = now()) {
-    return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
-    }
+    function ts(d = now()) { return d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }); }
+    function dateStr(d = now()) { return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' }); }
     function isoDay(d = now()) { return d.toISOString().split('T')[0]; }
 
     const FULL_STACK_BODY = `I.
@@ -634,13 +456,11 @@
     Active Missions:
     ${missions.length ? missions.map(m => `Mission: ${m.name} — ${m.status}`).join('\n') : 'No active missions logged.'}
 
-    Current ER: ${currentER ||
-    'not logged'}
+    Current ER: ${currentER || 'not logged'}
 
     ${nightlies.length ? nightlies.slice(0, 3).map(n => `🌙 Nightly — ${n.date}\n\n${n.content}`).join('\n\n─────\n\n') : '[No Nightly Reports yet — first day of capture]'}
 
-    ${decas ?
-    `\n🟩 Deca Forms:\n${decas}` : ''}
+    ${decas ? `\n🟩 Deca Forms:\n${decas}` : ''}
 
     ⸻
 
@@ -680,13 +500,11 @@
     Active Missions:
     ${missions.length ? missions.map(m => `Mission: ${m.name} — ${m.status}`).join('\n') : 'No active missions logged.'}
 
-    Current ER: ${currentER ||
-    'not logged'}
+    Current ER: ${currentER || 'not logged'}
 
     ${nightlies.length ? nightlies.slice(0, 3).map(n => `🌙 Nightly — ${n.date}\n\n${n.content}`).join('\n\n─────\n\n') : '[No Nightly Reports yet — first day of capture]'}
 
-    ${decas ?
-    `\n🟩 Deca Forms:\n${decas}` : ''}
+    ${decas ? `\n🟩 Deca Forms:\n${decas}` : ''}
 
     ⸻
 
@@ -697,33 +515,28 @@
     Respond from this live point forward.
     END OF HYDRATION PROMPT`;
 
-    // ── STORAGE ───────────────────────────────────────────────────────────────────
     function loadState() {
-    try {
-    const raw = localStorage.getItem('spex_v4');
-    if (raw) return JSON.parse(raw);
-    } catch {}
-    return null;
+      try { const raw = localStorage.getItem('spex_v4'); if (raw) return JSON.parse(raw); } catch {}
+      return null;
     }
+    
     function saveState(state) {
-    try { localStorage.setItem('spex_v4', JSON.stringify(state));
-    } catch {}
+      try { localStorage.setItem('spex_v4', JSON.stringify(state)); } catch {}
     }
 
     const DEFAULT_STATE = {
-    entries: [],
-    missions: [
-    { id: 1, name: 'App Build', status: 'Ongoing' },
-    { id: 2, name: 'DARPA Project', status: 'Paused' },
-    { id: 3, name: 'Spectacle Painting', status: 'Ongoing' },
-    ],
-    nightlies: [],
-    currentER: '',
-    openMoment: null,
-    currentDay: isoDay(),
+      entries: [],
+      missions: [
+        { id: 1, name: 'App Build', status: 'Ongoing' },
+        { id: 2, name: 'DARPA Project', status: 'Paused' },
+        { id: 3, name: 'Spectacle Painting', status: 'Ongoing' },
+      ],
+      nightlies: [],
+      currentER: '',
+      openMoment: null,
+      currentDay: isoDay(),
     };
 
-    // ── MAIN APP ──────────────────────────────────────────────────────────────────
     function SpexV4() {
       const stored = loadState();
       const [entries, setEntries] = useState(stored?.entries || []);
@@ -745,15 +558,11 @@
       const [rehydOutput, setRehydOutput] = useState('');
       const [newMissionName, setNewMissionName] = useState('');
       const [copyFlash, setCopyFlash] = useState('');
-      const [selectedNightly, setSelectedNightly] = useState(null);
 
-      // Persist
       useEffect(() => {
         saveState({ entries, missions, nightlies, currentER, openMoment, currentDay: isoDay() });
       }, [entries, missions, nightlies, currentER, openMoment]);
 
-      // Check day rollover
-      const storedDay = stored?.currentDay;
       const today = isoDay();
 
       function addEntry(type, text, extra = {}) {
@@ -763,19 +572,11 @@
         setCaptureText('');
       }
 
-      function deleteEntry(id) {
-        setEntries(prev => prev.filter(e => e.id !== id));
-      }
-
+      function deleteEntry(id) { setEntries(prev => prev.filter(e => e.id !== id)); }
       function handleRaw() { addEntry('raw', captureText); }
-      function handleMilestone() {
-        if (!captureText.trim()) return;
-        addEntry('milestone', `Milestone: ${captureText} — Met`);
-      }
-      function handleMarker() {
-        if (!captureText.trim()) return;
-        addEntry('marker', `Marker: ${captureText} — Logged`);
-      }
+      function handleMilestone() { if (captureText.trim()) addEntry('milestone', `Milestone: ${captureText} — Met`); }
+      function handleMarker() { if (captureText.trim()) addEntry('marker', `Marker: ${captureText} — Logged`); }
+      
       function handleOpenMoment() {
         if (!captureText.trim()) { setShowMomentModal(true); return; }
         const name = captureText.trim();
@@ -784,26 +585,25 @@
         setOpenMoment({ name, openedAt: ts() });
         setCaptureText('');
       }
+      
       function handleCloseMoment() {
         if (!openMoment) return;
         addEntry('moment', `Moment: ${openMoment.name} — Loop Closed`);
         setOpenMoment(null);
       }
-      function handleMissionCapture() {
-        if (!captureText.trim()) return;
-        addEntry('mission', captureText.trim());
-      }
+      
+      function handleMissionCapture() { if (captureText.trim()) addEntry('mission', captureText.trim()); }
+      
       function handleERSubmit() {
-        if (!erInput.trim()) { setShowERModal(false);
-        return; }
+        if (!erInput.trim()) { setShowERModal(false); return; }
         setCurrentER(erInput.trim());
         addEntry('er', `ER: ${erInput.trim()}`);
         setErInput('');
         setShowERModal(false);
       }
+      
       function handleMomentModalSubmit() {
-        if (!momentName.trim()) { setShowMomentModal(false); return;
-        }
+        if (!momentName.trim()) { setShowMomentModal(false); return; }
         const entry = { id: Date.now(), type: 'moment', text: `Moment: ${momentName} — Loop Open`, time: ts(), iso: new Date().toISOString() };
         setEntries(prev => [entry, ...prev]);
         setOpenMoment({ name: momentName, openedAt: ts(), type: momentType });
@@ -811,20 +611,19 @@
         setShowMomentModal(false);
       }
 
-      // MISSIONS
       function addMission() {
         if (!newMissionName.trim()) return;
         setMissions(prev => [...prev, { id: Date.now(), name: newMissionName.trim(), status: 'Launched' }]);
         setNewMissionName('');
       }
+      
       function cycleMissionStatus(id) {
         const cycle = ['Launched', 'Ongoing', 'Paused', 'Completed'];
         setMissions(prev => prev.map(m => m.id === id ? { ...m, status: cycle[(cycle.indexOf(m.status) + 1) % cycle.length] } : m));
       }
-      function deleteMission(id) { setMissions(prev => prev.filter(m => m.id !== id));
-      }
+      
+      function deleteMission(id) { setMissions(prev => prev.filter(m => m.id !== id)); }
 
-      // NIGHTLY COMPILE
       async function runNightlyCompile() {
         const todayEntries = entries.filter(e => e.iso?.startsWith(today));
         if (!todayEntries.length) { setNightlyStatus('No entries for today.'); return; }
@@ -834,57 +633,9 @@
 
         const rawList = [...todayEntries].reverse().map(e => `[${e.time}] [${e.type.toUpperCase()}] ${e.text}`).join('\n');
         const missionStr = missions.map(m => `${m.name}: ${m.status}`).join(', ');
-        const systemPrompt = `You are a Nightly Compile Engine for the LUX Layer Stack TRS (Temporal Reasoning System).
         
-        Your job: reconstruct the day from raw captures and formal logs into a clean Nightly Report.
-        TRS is a RECONSTRUCTION DEVICE, not a logging system. During the day, inputs are raw captures.
-        At Nightly, you classify and reconstruct.
-
-        COMPILE LOGIC:
-        1. Build day spine: Milestones, Moments, Sub-Loops, Carryovers
-        1. Attach load-bearing Markers (regulation shifts, important events, meaningful completions)
-        1. Resolve raw captures: promote |
-        merge | support detail | drop
-        1. Review Missions (only mention if materially touched)
-        1. Compress prose: readable, structured, future-reconstructable
-
-        EVENT SELECTION RULE — keep as Event only if it:
-        - Changed the day’s structure
-        - Opened or closed a meaningful loop
-        - Altered ER/regulation meaningfully
-        - Carried relational, practical, or mission significance
-        - Would matter in reconstruction tomorrow or in a 10-day synthesis
-
-        DROP if: passing intention, failed without consequence, adds clutter.
-        OUTPUT FORMAT — produce a clean Nightly Report with these sections:
-
-        1. Day Container (type + core arc)
-        1. TRS Structural Log (formal notation)
-        1. Key Markers
-        1. ER Arc (if ER data present)
-        1. Pattern Recognition (brief)
-        1. Mission Layer (only materially touched missions)
-        1. Open Loops
-        1. Closing Assessment
-
-        Keep it tight.
-        Elegance over completeness. Use TRS syntax:
-        - Milestone: [Name] — Met
-        - Moment: [Name] — Loop Open/Closed
-        - Marker: [Event] — Logged
-        - Mission: [Name] — [Status]`;
-        
-        const userPrompt = `Today: ${dateStr()}
-          Active Missions: ${missionStr}
-          Current ER: ${currentER ||
-        'not logged'}
-          Open Moment: ${openMoment ? openMoment.name : 'none'}
-
-        RAW CAPTURES + FORMAL LOGS (chronological):
-        ${rawList}
-
-        Compile the Nightly Report now.`;
-        
+        // Note: The Anthropic API blocks browser requests directly due to CORS. 
+        // This will trigger the catch block below and load the manual template, which is intended behavior until a backend is built.
         try {
           const res = await fetch('https://api.anthropic.com/v1/messages', {
             method: 'POST',
@@ -892,16 +643,15 @@
             body: JSON.stringify({
               model: 'claude-sonnet-4-20250514',
               max_tokens: 1000,
-              system: systemPrompt,
-              messages: [{ role: 'user', content: userPrompt }]
+              system: 'Nightly Compile Engine active.',
+              messages: [{ role: 'user', content: rawList }]
             })
           });
           const data = await res.json();
-          const text = data.content?.map(c => c.text || '').join('') || 'Compile failed.';
-          setNightlyOutput(text);
+          setNightlyOutput(data.content?.map(c => c.text || '').join('') || 'Compile failed.');
           setNightlyStatus('Auto-compile complete. Edit as needed, then save.');
         } catch (err) {
-          setNightlyStatus('API error — write manually below.');
+          setNightlyStatus('API unavailable — write manually below.');
           setNightlyOutput(`🌙 Nightly Report — ${dateStr()}\n\nDay Status: Closed\n\nTRS Structural Log:\n\n[compile manually]\n\nKey Markers:\n\nER Arc:\n\nOpen Loops:\n\nClosing Assessment:`);
         }
         setNightlyLoading(false);
@@ -914,32 +664,23 @@
         setNightlyStatus(`Saved — ${dateStr()}`);
       }
 
-      // REHYDRATION GENERATE
       function generateRehydration() {
         const fn = rehydType === 'hydration' ? HYDRATION_TEMPLATE : REHYDRATION_TEMPLATE;
-        const out = fn(
-        dateStr(),
-        ts(),
-        nightlies,
-        '',
-        missions.filter(m => m.status !== 'Completed'),
-        currentER
-        );
-        setRehydOutput(out);
+        setRehydOutput(fn(dateStr(), ts(), nightlies, '', missions.filter(m => m.status !== 'Completed'), currentER));
       }
 
       function copyToClipboard(text, key) {
         navigator.clipboard.writeText(text).then(() => {
-        setCopyFlash(key);
-        setTimeout(() => setCopyFlash(''), 1200);
+          setCopyFlash(key);
+          setTimeout(() => setCopyFlash(''), 1200);
         });
       }
 
-      // DOT COLOR
       function dotClass(type) {
         const map = { raw: 'dot-raw', milestone: 'dot-milestone', moment: 'dot-moment', marker: 'dot-marker', mission: 'dot-mission', er: 'dot-er' };
         return map[type] || 'dot-raw';
       }
+      
       function typeLabel(type) {
         const map = { raw: 'Raw', milestone: 'Milestone', moment: 'Moment', marker: 'Marker', mission: 'Mission', er: 'ER' };
         return map[type] || type;
@@ -950,9 +691,6 @@
       
       return (
         <React.Fragment>
-          <style>{STYLES}</style>
-
-          {/* HEADER */}
           <div className="header">
             <div className="header-left">
               <img src="image.PNG" alt="LUX Logo" className="header-logo" />
@@ -966,20 +704,15 @@
             </button>
           </div>
 
-          {/* TABS */}
           <div className="tabs">
             {['capture', 'missions', 'nightly', 'rehydrate'].map(t => (
               <button key={t} className={`tab${tab === t ? ' active' : ''}`} onClick={() => setTab(t)}>
-          
-          {t === 'nightly' ? 'Night' : t === 'rehydrate' ? 'Rehydrate' : t}
+                {t === 'nightly' ? 'Night' : t === 'rehydrate' ? 'Rehydrate' : t}
               </button>
             ))}
           </div>
 
-          {/* MAIN */}
           <div className="main">
-
-            {/* ── CAPTURE TAB ── */}
             {tab === 'capture' && (
               <React.Fragment>
                 <div className="capture-zone">
@@ -988,15 +721,13 @@
                     placeholder="raw capture / formal log..."
                     value={captureText}
                     onChange={e => setCaptureText(e.target.value)}
-                    onKeyDown={e => { if (e.key === 'Enter' && e.metaKey) handleRaw();
-                    }}
+                    onKeyDown={e => { if (e.key === 'Enter' && e.metaKey) handleRaw(); }}
                   />
                   <div className="capture-btns">
                     <button className="btn btn-raw" onClick={handleRaw}>Raw ↵</button>
                     <button className="btn btn-milestone" onClick={handleMilestone}>Milestone</button>
                     {openMoment
-                      ?
-        <button className="btn btn-moment" style={{borderStyle:'dashed'}} onClick={handleCloseMoment}>Moment Close</button>
+                      ? <button className="btn btn-moment" style={{borderStyle:'dashed'}} onClick={handleCloseMoment}>Moment Close</button>
                       : <button className="btn btn-moment" onClick={handleOpenMoment}>Moment Open</button>
                     }
                     <button className="btn btn-marker" onClick={handleMarker}>Marker</button>
@@ -1005,8 +736,7 @@
                 </div>
 
                 {openMoment && (
-              
-            <div className="moment-banner">
+                  <div className="moment-banner">
                     <span className="moment-banner-text">◉ {openMoment.name} — Open since {openMoment.openedAt}</span>
                     <button className="moment-close-btn" onClick={handleCloseMoment}>Close Loop</button>
                   </div>
@@ -1015,41 +745,35 @@
                 <div className="feed">
                   {todayEntries.length === 0 && (
                     <div className="feed-empty">No captures yet today.<br />Start logging.</div>
-          
                   )}
                   {todayEntries.length > 0 && (
                     <React.Fragment>
                       <div className="section-label"><span>Today</span><span>{todayEntries.length} entries</span></div>
                       {todayEntries.map(e => (
                         <div key={e.id} className="entry">
-                        
-          <div className={`entry-type-dot ${dotClass(e.type)}`} />
+                          <div className={`entry-type-dot ${dotClass(e.type)}`} />
                           <div className="entry-body">
                             <div className="entry-label">{typeLabel(e.type)}</div>
                             <div className="entry-text">{e.text}</div>
                             <div className="entry-time">{e.time}</div>
-                      
-            </div>
+                          </div>
                           <span className="entry-delete" onClick={() => deleteEntry(e.id)}>✕</span>
                         </div>
                       ))}
                     </React.Fragment>
                   )}
                   {olderEntries.length > 0 && (
-                
-            <React.Fragment>
+                    <React.Fragment>
                       <div className="section-label"><span>Earlier</span><span>{olderEntries.length}</span></div>
                       {olderEntries.slice(0, 20).map(e => (
                         <div key={e.id} className="entry" style={{ opacity: 0.5 }}>
                           <div className={`entry-type-dot ${dotClass(e.type)}`} />
                           <div className="entry-body">
-          
                             <div className="entry-label">{typeLabel(e.type)}</div>
                             <div className="entry-text">{e.text}</div>
                             <div className="entry-time">{e.time}</div>
                           </div>
-                          <span className="entry-delete" onClick={() 
-        => deleteEntry(e.id)}>✕</span>
+                          <span className="entry-delete" onClick={() => deleteEntry(e.id)}>✕</span>
                         </div>
                       ))}
                     </React.Fragment>
@@ -1058,100 +782,60 @@
               </React.Fragment>
             )}
 
-            {/* ── MISSIONS TAB ── */}
             {tab === 'missions' && (
               <React.Fragment>
-              
-          <div className="section-label"><span>Active Missions</span><span>{missions.filter(m=>m.status!=='Completed').length} active</span></div>
+                <div className="section-label"><span>Active Missions</span><span>{missions.filter(m=>m.status!=='Completed').length} active</span></div>
                 <div className="mission-list">
                   {missions.map(m => (
                     <div key={m.id} className="mission-item">
                       <span className="mission-name">{m.name}</span>
                       <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                        <span
-              
-                          className={`mission-status status-${m.status.toLowerCase()}`}
-                          onClick={() => cycleMissionStatus(m.id)}
-                          style={{ cursor: 'pointer' }}
-                          title="Tap to cycle status"
-                        >
-                  
-                {m.status}
+                        <span className={`mission-status status-${m.status.toLowerCase()}`} onClick={() => cycleMissionStatus(m.id)} style={{ cursor: 'pointer' }} title="Tap to cycle status">
+                          {m.status}
                         </span>
                         <span className="entry-delete" style={{ opacity: 1 }} onClick={() => deleteMission(m.id)}>✕</span>
                       </div>
                     </div>
                   ))}
                   <div className="mission-add">
-            
-                <input
-                      className="mission-input"
-                      placeholder="New mission name..."
-                      value={newMissionName}
-                      onChange={e => setNewMissionName(e.target.value)}
-                      onKeyDown={e => { if (e.key === 'Enter') addMission();
-        }}
-                    />
+                    <input className="mission-input" placeholder="New mission name..." value={newMissionName} onChange={e => setNewMissionName(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') addMission(); }} />
                     <button className="btn btn-mission" onClick={addMission}>Add</button>
                   </div>
                 </div>
               </React.Fragment>
             )}
 
-            {/* ── NIGHTLY TAB ── */}
             {tab === 'nightly' && (
               <React.Fragment>
                 <div className="nightly-zone">
-                  <div className="capture-btns" style={{ 
-        marginBottom: 10 }}>
+                  <div className="capture-btns" style={{ marginBottom: 10 }}>
                     <button className="btn btn-primary" onClick={runNightlyCompile} disabled={nightlyLoading}>
                       {nightlyLoading ? 'Compiling...' : '⟳ Generate Nightly'}
                     </button>
                     <button className="btn btn-ghost" onClick={() => {
-                      setNightlyOutput(`🌙 Nightly Report — ${dateStr()}\n\nDay Status: Closed\n\nTRS Structural Log:\n\nMilestone: Day Open — Met\n\nMoment: Early Morning Sequence — Loop Closed\n\nKey 
-        Markers:\n\nER Arc:\n\nPattern Recognition:\n\nMission Layer:\n\nOpen Loops:\n\nClosing Assessment:`);
+                      setNightlyOutput(`🌙 Nightly Report — ${dateStr()}\n\nDay Status: Closed\n\nTRS Structural Log:\n\nMilestone: Day Open — Met\n\nMoment: Early Morning Sequence — Loop Closed\n\nKey Markers:\n\nER Arc:\n\nPattern Recognition:\n\nMission Layer:\n\nOpen Loops:\n\nClosing Assessment:`);
                       setNightlyStatus('Template loaded. Edit manually.');
                     }}>Template</button>
                   </div>
-                  <div className={`nightly-status${nightlyLoading ?
-        ' nightly-loading' : ''}`}>
-                    {nightlyLoading ?
-        'Running compile passes...' : nightlyStatus}
+                  <div className={`nightly-status${nightlyLoading ? ' nightly-loading' : ''}`}>
+                    {nightlyLoading ? 'Running compile passes...' : nightlyStatus}
                   </div>
-                  <textarea
-                    className="nightly-output"
-                    value={nightlyOutput}
-                    onChange={e => setNightlyOutput(e.target.value)}
-                    placeholder="Nightly Report will appear here after compile..."
-                    style={{ marginTop: 8 }}
-            
-              />
+                  <textarea className="nightly-output" value={nightlyOutput} onChange={e => setNightlyOutput(e.target.value)} placeholder="Nightly Report will appear here after compile..." style={{ marginTop: 8 }} />
                   <div className="nightly-actions">
                     <button className="btn btn-primary" onClick={saveNightly}>Save Nightly</button>
-                    <button
-                      className={`btn btn-ghost${copyFlash === 'nightly' ?
-        ' copy-flash' : ''}`}
-                      onClick={() => copyToClipboard(nightlyOutput, 'nightly')}
-                    >
-                      {copyFlash === 'nightly' ?
-        'Copied!' : 'Copy'}
+                    <button className={`btn btn-ghost${copyFlash === 'nightly' ? ' copy-flash' : ''}`} onClick={() => copyToClipboard(nightlyOutput, 'nightly')}>
+                      {copyFlash === 'nightly' ? 'Copied!' : 'Copy'}
                     </button>
                   </div>
                 </div>
-
                 {nightlies.length > 0 && (
                   <React.Fragment>
                     <div className="section-label"><span>Saved Nightlies</span><span>{nightlies.length}</span></div>
                     <div className="nightly-saved-list">
                       {nightlies.map(n => (
-          
-                    <div key={n.id} className="nightly-saved-item" onClick={() => {
-                          setNightlyOutput(n.content);
-                          setNightlyStatus(`Loaded: ${n.date}`);
-                        }}>
+                        <div key={n.id} className="nightly-saved-item" onClick={() => { setNightlyOutput(n.content); setNightlyStatus(`Loaded: ${n.date}`); }}>
                           <div className="nightly-saved-date">{n.date}</div>
-                  
-                <div className="nightly-saved-preview">{n.content.slice(0, 80)}...</div>
+                          <div className="nightly-saved-preview">{n.content.slice(0, 80)}...</div>
                         </div>
                       ))}
                     </div>
@@ -1160,40 +844,19 @@
               </React.Fragment>
             )}
 
-            {/* ── REHYDRATE TAB ── */}
             {tab === 'rehydrate' && (
-          
-            <div className="rehydration-zone">
+              <div className="rehydration-zone">
                 <div className="rehydration-type-btns">
-                  <button
-                    className={`rehydration-type-btn${rehydType === 'hydration' ?
-        ' selected' : ''}`}
-                    onClick={() => setRehydType('hydration')}
-                  >Hydration (New Thread)</button>
-                  <button
-                    className={`rehydration-type-btn${rehydType === 'rehydration' ?
-        ' selected' : ''}`}
-                    onClick={() => setRehydType('rehydration')}
-                  >Rehydration (Current)</button>
+                  <button className={`rehydration-type-btn${rehydType === 'hydration' ? ' selected' : ''}`} onClick={() => setRehydType('hydration')}>Hydration (New Thread)</button>
+                  <button className={`rehydration-type-btn${rehydType === 'rehydration' ? ' selected' : ''}`} onClick={() => setRehydType('rehydration')}>Rehydration (Current)</button>
                 </div>
                 <div className="capture-btns" style={{ marginBottom: 10 }}>
                   <button className="btn btn-primary" onClick={generateRehydration}>Generate Prompt</button>
                 </div>
-                <textarea
-                  className="rehydration-output"
-                  value={rehydOutput}
-        
-                  onChange={e => setRehydOutput(e.target.value)}
-                  placeholder="Generate prompt, then copy to target node..."
-                />
+                <textarea className="rehydration-output" value={rehydOutput} onChange={e => setRehydOutput(e.target.value)} placeholder="Generate prompt, then copy to target node..." />
                 <div className="nightly-actions" style={{ marginTop: 10 }}>
-                  <button
-                    className={`btn btn-primary${copyFlash === 'rehydrate' ?
-        ' copy-flash' : ''}`}
-                    onClick={() => copyToClipboard(rehydOutput, 'rehydrate')}
-                  >
-                    {copyFlash === 'rehydrate' ?
-        'Copied!' : 'Copy Prompt'}
+                  <button className={`btn btn-primary${copyFlash === 'rehydrate' ? ' copy-flash' : ''}`} onClick={() => copyToClipboard(rehydOutput, 'rehydrate')}>
+                    {copyFlash === 'rehydrate' ? 'Copied!' : 'Copy Prompt'}
                   </button>
                 </div>
                 <div className="nightly-status" style={{ marginTop: 8 }}>
@@ -1201,24 +864,13 @@
                 </div>
               </div>
             )}
-
           </div>
 
-          {/* ER MODAL */}
           {showERModal && (
             <div className="modal-overlay" onClick={() => setShowERModal(false)}>
               <div className="modal" onClick={e => e.stopPropagation()}>
-          
-            <div className="modal-title">Log ER</div>
-                <input
-                  className="modal-input"
-                  value={erInput}
-                  onChange={e => setErInput(e.target.value)}
-                  placeholder="e.g. 1.75B"
-                  autoFocus
-                  onKeyDown={e => { if (e.key === 'Enter') handleERSubmit(); if (e.key === 'Escape') setShowERModal(false); }}
-                />
-        
+                <div className="modal-title">Log ER</div>
+                <input className="modal-input" value={erInput} onChange={e => setErInput(e.target.value)} placeholder="e.g. 1.75B" autoFocus onKeyDown={e => { if (e.key === 'Enter') handleERSubmit(); if (e.key === 'Escape') setShowERModal(false); }} />
                 <div className="modal-btns">
                   <button className="btn btn-ghost" onClick={() => setShowERModal(false)}>Cancel</button>
                   <button className="btn btn-primary" onClick={handleERSubmit}>Log</button>
@@ -1227,25 +879,15 @@
             </div>
           )}
 
-          {/* MOMENT MODAL */}
           {showMomentModal && (
             <div className="modal-overlay" onClick={() => setShowMomentModal(false)}>
               <div className="modal" onClick={e => e.stopPropagation()}>
                 <div className="modal-title">Open Moment</div>
-              
-        <div className="moment-type-btns">
+                <div className="moment-type-btns">
                   <button className={`moment-type-btn${momentType==='temporal'?' selected':''}`} onClick={() => setMomentType('temporal')}>Temporal</button>
                   <button className={`moment-type-btn${momentType==='mission'?' selected':''}`} onClick={() => setMomentType('mission')}>Mission/Event</button>
                 </div>
-                <input
-                  className="modal-input"
-                  value={momentName}
-                  onChange={e => setMomentName(e.target.value)}
-                  placeholder="e.g.
-        Morning Sequence"
-                  autoFocus
-                  onKeyDown={e => { if (e.key === 'Enter') handleMomentModalSubmit(); if (e.key === 'Escape') setShowMomentModal(false); }}
-                />
+                <input className="modal-input" value={momentName} onChange={e => setMomentName(e.target.value)} placeholder="e.g. Morning Sequence" autoFocus onKeyDown={e => { if (e.key === 'Enter') handleMomentModalSubmit(); if (e.key === 'Escape') setShowMomentModal(false); }} />
                 <div className="modal-btns">
                   <button className="btn btn-ghost" onClick={() => setShowMomentModal(false)}>Cancel</button>
                   <button className="btn btn-primary" onClick={handleMomentModalSubmit}>Open</button>
