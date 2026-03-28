@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -10,7 +11,7 @@
   <link rel="apple-touch-icon" href="./image.PNG">
   
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=IBM+Plex+Sans:wght@300;400;500&display=swap');
+
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
@@ -77,6 +78,7 @@
     .entry-text { font-size: 12px; color: var(--text); line-height: 1.45; word-break: break-word; }
     .entry-time { font-size: 9px; color: var(--text3); margin-top: 3px; }
     
+    /* Updated Entry Actions */
     .entry-actions { display: flex; gap: 10px; opacity: 0; transition: opacity 0.15s; flex-shrink: 0; }
     .entry:hover .entry-actions { opacity: 1; }
     .entry-action { font-size: 12px; color: var(--text3); cursor: pointer; padding: 2px; }
@@ -386,4 +388,552 @@
     1. LUX Layer Stack Framework
     1. Nightly Reports (most recent 3 days)
     1. Deca Forms
-    1. Return to current timestamp / current
+    1. Return to current timestamp / current ask
+
+    Use Nightlies for recent edge detail, Decas for compressed long-range pattern, SSR for continuity across compression seams.
+    Do not mistake Deca compression for missing continuity.
+
+    ⸻
+
+    VII. ASSISTANT BEHAVIOR EXPECTATIONS (ACTIVE)
+
+    When operating under this stack:
+    • prioritize structure over verbosity
+    • maintain temporal clarity
+    • preserve continuity across turns
+    • support regulation, not escalation
+    • avoid grandiosity
+    • expose uncertainty when present
+    • avoid narrative inflation
+    • do not confuse tone mimicry with actual continuity
+    • do not overstate rehydration success
+    • distinguish between: structural convergence |
+    epistemic integrity | pattern continuity | exact recall
+
+    If rehydration appears successful, state carefully: what is loaded, what is inferred, what remains uncertain.
+    Do NOT say: “continuous context fully established” or “all reports parsed and integrated” unless literally true.
+    Prefer: “structured continuity appears sufficient to proceed” / “pattern-level continuity is active” / “SSR-compatible continuity appears present”
+
+    ⸻
+
+    VIII.
+    OUTPUT REQUIREMENT FOR INITIAL REHYDRATION RESPONSE
+
+    The first response should only:
+
+    1. Confirm current day/time anchor
+    1. State whether rehydration appears successful
+    1. Distinguish: what is explicitly loaded |
+    what is inferred structurally | what is still uncertain
+    1. Identify current live container if possible
+    1. Maintain grounded tone
+    1. Do not overperform certainty
+
+    Format:
+    Rehydration Status • [brief answer]
+    What is explicitly loaded • [items]
+    What is structurally inferred • [items]
+    What remains uncertain • [items]
+    Current position • [Day / Moment / live read if available]`;
+
+    const REHYDRATION_TEMPLATE = (dayAnchor, timeStr, nightlies, decas, missions, currentER) => `⭐️⭐️ LUX Layer Stack ⭐️⭐️
+
+    LUX Layer Stack — Cold Thread Rehydration Prompt (High-Fidelity Version)
+
+    ${dayAnchor}: Day Open
+
+    ${timeStr}
+
+    Hello!
+    Your task is to rehydrate structured continuity at the highest possible fidelity without overclaiming memory, access, or certainty.
+    Priority is:
+
+    1. stable useful continuity
+    1. structural accuracy
+    1. epistemic honesty
+    1. grounded regulation
+
+    Do not perform emotional, symbolic, mystical, psychological, or metaphysical interpretation.
+    ⸻
+
+    ${FULL_STACK_BODY}
+
+    ⸻
+
+    IX. MATERIAL TO REHYDRATE FROM
+
+    Active Missions:
+    ${missions.length ? missions.map(m => `Mission: ${m.name} — ${m.status}`).join('\n') : 'No active missions logged.'}
+
+    Current ER: ${currentER || 'not logged'}
+
+    ${nightlies.length ? nightlies.slice(0, 3).map(n => `🌙 Nightly — ${n.date}\n\n${n.content}`).join('\n\n─────\n\n') : '[No Nightly Reports yet — first day of capture]'}
+
+    ${decas ? `\n🟩 Deca Forms:\n${decas}` : ''}
+
+    ⸻
+
+    X. CURRENT TIMESTAMP / RETURN TO LIVE THREAD
+
+    ${timeStr}
+
+    Respond from this live point forward.
+    END OF REHYDRATION PROMPT`;
+
+    const HYDRATION_TEMPLATE = (dayAnchor, timeStr, nightlies, decas, missions, currentER) => `⭐️⭐️ LUX Layer Stack ⭐️⭐️
+
+    LUX Layer Stack — New Thread Hydration Prompt (High-Fidelity Version)
+
+    ${dayAnchor}: Day Open
+
+    ${timeStr}
+
+    Hello!
+    Your task is to hydrate structured continuity at the highest possible fidelity without overclaiming memory, access, or certainty.
+    Priority is:
+
+    1. stable useful continuity
+    1. structural accuracy
+    1. epistemic honesty
+    1. grounded regulation
+
+    Do not perform emotional, symbolic, mystical, psychological, or metaphysical interpretation.
+    ⸻
+
+    ${FULL_STACK_BODY}
+
+    ⸻
+
+    IX. MATERIAL TO HYDRATE FROM
+
+    Active Missions:
+    ${missions.length ? missions.map(m => `Mission: ${m.name} — ${m.status}`).join('\n') : 'No active missions logged.'}
+
+    Current ER: ${currentER || 'not logged'}
+
+    ${nightlies.length ? nightlies.slice(0, 3).map(n => `🌙 Nightly — ${n.date}\n\n${n.content}`).join('\n\n─────\n\n') : '[No Nightly Reports yet — first day of capture]'}
+
+    ${decas ? `\n🟩 Deca Forms:\n${decas}` : ''}
+
+    ⸻
+
+    X. CURRENT TIMESTAMP / RETURN TO LIVE THREAD
+
+    ${timeStr}
+
+    Respond from this live point forward.
+    END OF HYDRATION PROMPT`;
+
+    function loadState() {
+      try { const raw = localStorage.getItem('spex_v4'); if (raw) return JSON.parse(raw); } catch {}
+      return null;
+    }
+    
+    function saveState(state) {
+      try { localStorage.setItem('spex_v4', JSON.stringify(state)); } catch {}
+    }
+
+    const DEFAULT_STATE = {
+      entries: [],
+      missions: [
+        { id: 1, name: 'App Build', status: 'Ongoing' },
+        { id: 2, name: 'DARPA Project', status: 'Paused' },
+        { id: 3, name: 'Spectacle Painting', status: 'Ongoing' },
+      ],
+      nightlies: [],
+      currentER: '',
+      openMoment: null,
+      currentDay: isoDay(),
+    };
+
+    function SpexV4() {
+      const stored = loadState();
+      const [entries, setEntries] = useState(stored?.entries || []);
+      const [missions, setMissions] = useState(stored?.missions || DEFAULT_STATE.missions);
+      const [nightlies, setNightlies] = useState(stored?.nightlies || []);
+      const [currentER, setCurrentER] = useState(stored?.currentER || '');
+      const [openMoment, setOpenMoment] = useState(stored?.openMoment || null);
+      const [tab, setTab] = useState('capture');
+      const [captureText, setCaptureText] = useState('');
+      const [showERModal, setShowERModal] = useState(false);
+      const [erInput, setErInput] = useState('');
+      const [showMomentModal, setShowMomentModal] = useState(false);
+      const [momentName, setMomentName] = useState('');
+      const [momentType, setMomentType] = useState('temporal');
+      const [nightlyOutput, setNightlyOutput] = useState('');
+      const [nightlyStatus, setNightlyStatus] = useState('');
+      const [nightlyLoading, setNightlyLoading] = useState(false);
+      const [rehydType, setRehydType] = useState('rehydration');
+      const [rehydOutput, setRehydOutput] = useState('');
+      const [newMissionName, setNewMissionName] = useState('');
+      const [copyFlash, setCopyFlash] = useState('');
+
+      useEffect(() => {
+        saveState({ entries, missions, nightlies, currentER, openMoment, currentDay: isoDay() });
+      }, [entries, missions, nightlies, currentER, openMoment]);
+
+      const today = isoDay();
+
+      function addEntry(type, text, extra = {}) {
+        if (!text.trim()) return;
+        const e = { id: Date.now(), type, text: text.trim(), time: ts(), iso: new Date().toISOString(), ...extra };
+        setEntries(prev => [e, ...prev]);
+        setCaptureText('');
+      }
+
+      function deleteEntry(id) { setEntries(prev => prev.filter(e => e.id !== id)); }
+      
+      // New Edit Function
+      function editEntry(id, oldText) {
+        const newText = window.prompt("Edit entry:", oldText);
+        if (newText !== null && newText.trim() !== '') {
+          setEntries(prev => prev.map(e => e.id === id ? { ...e, text: newText.trim() } : e));
+        }
+      }
+
+      function handleRaw() { addEntry('raw', captureText); }
+      
+      function handleMilestone() { 
+        const val = captureText.trim() || window.prompt("Enter Milestone name:");
+        if (val) addEntry('milestone', `Milestone: ${val} — Met`); 
+      }
+      
+      function handleMarker() { 
+        const val = captureText.trim() || window.prompt("Enter Marker detail:");
+        if (val) addEntry('marker', `Marker: ${val} — Logged`); 
+      }
+      
+      function handleOpenMoment() {
+        if (!captureText.trim()) { setShowMomentModal(true); return; }
+        const name = captureText.trim();
+        const entry = { id: Date.now(), type: 'moment', text: `Moment: ${name} — Loop Open`, time: ts(), iso: new Date().toISOString() };
+        setEntries(prev => [entry, ...prev]);
+        setOpenMoment({ name, openedAt: ts() });
+        setCaptureText('');
+      }
+      
+      function handleCloseMoment() {
+        if (!openMoment) return;
+        addEntry('moment', `Moment: ${openMoment.name} — Loop Closed`);
+        setOpenMoment(null);
+      }
+      
+      function handleMissionCapture() { 
+        const val = captureText.trim() || window.prompt("Enter Mission update:");
+        if (val) addEntry('mission', val); 
+      }
+      
+      function handleERSubmit() {
+        if (!erInput.trim()) { setShowERModal(false); return; }
+        setCurrentER(erInput.trim());
+        addEntry('er', `ER: ${erInput.trim()}`);
+        setErInput('');
+        setShowERModal(false);
+      }
+      
+      function handleMomentModalSubmit() {
+        if (!momentName.trim()) { setShowMomentModal(false); return; }
+        const entry = { id: Date.now(), type: 'moment', text: `Moment: ${momentName} — Loop Open`, time: ts(), iso: new Date().toISOString() };
+        setEntries(prev => [entry, ...prev]);
+        setOpenMoment({ name: momentName, openedAt: ts(), type: momentType });
+        setMomentName('');
+        setShowMomentModal(false);
+      }
+
+      function addMission() {
+        if (!newMissionName.trim()) return;
+        setMissions(prev => [...prev, { id: Date.now(), name: newMissionName.trim(), status: 'Launched' }]);
+        setNewMissionName('');
+      }
+      
+      function cycleMissionStatus(id) {
+        const cycle = ['Launched', 'Ongoing', 'Paused', 'Completed'];
+        setMissions(prev => prev.map(m => m.id === id ? { ...m, status: cycle[(cycle.indexOf(m.status) + 1) % cycle.length] } : m));
+      }
+      
+      function deleteMission(id) { setMissions(prev => prev.filter(m => m.id !== id)); }
+
+      async function runNightlyCompile() {
+        const todayEntries = entries.filter(e => e.iso?.startsWith(today));
+        if (!todayEntries.length) { setNightlyStatus('No entries for today.'); return; }
+
+        setNightlyLoading(true);
+        setNightlyStatus('Compiling...');
+
+        const rawList = [...todayEntries].reverse().map(e => `[${e.time}] [${e.type.toUpperCase()}] ${e.text}`).join('\n');
+        const missionStr = missions.map(m => `${m.name}: ${m.status}`).join(', ');
+        
+        try {
+          const res = await fetch('https://api.anthropic.com/v1/messages', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              model: 'claude-sonnet-4-20250514',
+              max_tokens: 1000,
+              system: 'Nightly Compile Engine active.',
+              messages: [{ role: 'user', content: rawList }]
+            })
+          });
+          const data = await res.json();
+          setNightlyOutput(data.content?.map(c => c.text || '').join('') || 'Compile failed.');
+          setNightlyStatus('Auto-compile complete. Edit as needed, then save.');
+        } catch (err) {
+          setNightlyStatus('API unavailable — write manually below.');
+          setNightlyOutput(`🌙 Nightly Report — ${dateStr()}\n\nDay Status: Closed\n\nTRS Structural Log:\n\n[compile manually]\n\nKey Markers:\n\nER Arc:\n\nOpen Loops:\n\nClosing Assessment:`);
+        }
+        setNightlyLoading(false);
+      }
+
+      function saveNightly() {
+        if (!nightlyOutput.trim()) return;
+        const newNightly = { id: Date.now(), date: dateStr(), dayKey: today, content: nightlyOutput };
+        setNightlies(prev => [newNightly, ...prev.filter(n => n.dayKey !== today)]);
+        setNightlyStatus(`Saved — ${dateStr()}`);
+      }
+
+      function generateRehydration() {
+        const fn = rehydType === 'hydration' ? HYDRATION_TEMPLATE : REHYDRATION_TEMPLATE;
+        setRehydOutput(fn(dateStr(), ts(), nightlies, '', missions.filter(m => m.status !== 'Completed'), currentER));
+      }
+
+      function copyToClipboard(text, key) {
+        navigator.clipboard.writeText(text).then(() => {
+          setCopyFlash(key);
+          setTimeout(() => setCopyFlash(''), 1200);
+        });
+      }
+
+      function dotClass(type) {
+        const map = { raw: 'dot-raw', milestone: 'dot-milestone', moment: 'dot-moment', marker: 'dot-marker', mission: 'dot-mission', er: 'dot-er' };
+        return map[type] || 'dot-raw';
+      }
+      
+      function typeLabel(type) {
+        const map = { raw: 'Raw', milestone: 'Milestone', moment: 'Moment', marker: 'Marker', mission: 'Mission', er: 'ER' };
+        return map[type] || type;
+      }
+
+      const todayEntries = entries.filter(e => e.iso?.startsWith(today));
+      const olderEntries = entries.filter(e => !e.iso?.startsWith(today));
+      
+      return (
+        <React.Fragment>
+          <div className="header">
+            <div className="header-left">
+              <img src="./image.PNG" alt="LUX Logo" className="header-logo" />
+              <div>
+                <div className="header-title">Spex v4</div>
+                <div className="header-day">{dateStr()}</div>
+              </div>
+            </div>
+            <button className="er-badge" onClick={() => { setErInput(currentER); setShowERModal(true); }}>
+              {currentER ? `ER ${currentER}` : 'Log ER'}
+            </button>
+          </div>
+
+          <div className="tabs">
+            {['capture', 'missions', 'nightly', 'rehydrate'].map(t => (
+              <button key={t} className={`tab${tab === t ? ' active' : ''}`} onClick={() => setTab(t)}>
+                {t === 'nightly' ? 'Night' : t === 'rehydrate' ? 'Rehydrate' : t}
+              </button>
+            ))}
+          </div>
+
+          <div className="main">
+            {tab === 'capture' && (
+              <React.Fragment>
+                <div className="capture-zone">
+                  <textarea
+                    className="capture-input"
+                    placeholder="raw capture / formal log..."
+                    value={captureText}
+                    onChange={e => setCaptureText(e.target.value)}
+                    onKeyDown={e => { if (e.key === 'Enter' && e.metaKey) handleRaw(); }}
+                  />
+                  <div className="capture-btns">
+                    <button className="btn btn-raw" onClick={handleRaw}>Raw ↵</button>
+                    <button className="btn btn-milestone" onClick={handleMilestone}>Milestone</button>
+                    {openMoment
+                      ? <button className="btn btn-moment" style={{borderStyle:'dashed'}} onClick={handleCloseMoment}>Moment Close</button>
+                      : <button className="btn btn-moment" onClick={handleOpenMoment}>Moment Open</button>
+                    }
+                    <button className="btn btn-marker" onClick={handleMarker}>Marker</button>
+                    <button className="btn btn-mission" onClick={handleMissionCapture}>Mission</button>
+                  </div>
+                </div>
+
+                {openMoment && (
+                  <div className="moment-banner">
+                    <span className="moment-banner-text">◉ {openMoment.name} — Open since {openMoment.openedAt}</span>
+                    <button className="moment-close-btn" onClick={handleCloseMoment}>Close Loop</button>
+                  </div>
+                )}
+
+                <div className="feed">
+                  {todayEntries.length === 0 && (
+                    <div className="feed-empty">No captures yet today.<br />Start logging.</div>
+                  )}
+                  {todayEntries.length > 0 && (
+                    <React.Fragment>
+                      <div className="section-label"><span>Today</span><span>{todayEntries.length} entries</span></div>
+                      {todayEntries.map(e => (
+                        <div key={e.id} className="entry">
+                          <div className={`entry-type-dot ${dotClass(e.type)}`} />
+                          <div className="entry-body">
+                            <div className="entry-label">{typeLabel(e.type)}</div>
+                            <div className="entry-text">{e.text}</div>
+                            <div className="entry-time">{e.time}</div>
+                          </div>
+                          <div className="entry-actions">
+                            <span className="entry-action" onClick={() => editEntry(e.id, e.text)}>✎</span>
+                            <span className="entry-action danger" onClick={() => deleteEntry(e.id)}>✕</span>
+                          </div>
+                        </div>
+                      ))}
+                    </React.Fragment>
+                  )}
+                  {olderEntries.length > 0 && (
+                    <React.Fragment>
+                      <div className="section-label"><span>Earlier</span><span>{olderEntries.length}</span></div>
+                      {olderEntries.slice(0, 20).map(e => (
+                        <div key={e.id} className="entry" style={{ opacity: 0.5 }}>
+                          <div className={`entry-type-dot ${dotClass(e.type)}`} />
+                          <div className="entry-body">
+                            <div className="entry-label">{typeLabel(e.type)}</div>
+                            <div className="entry-text">{e.text}</div>
+                            <div className="entry-time">{e.time}</div>
+                          </div>
+                          <div className="entry-actions">
+                            <span className="entry-action" onClick={() => editEntry(e.id, e.text)}>✎</span>
+                            <span className="entry-action danger" onClick={() => deleteEntry(e.id)}>✕</span>
+                          </div>
+                        </div>
+                      ))}
+                    </React.Fragment>
+                  )}
+                </div>
+              </React.Fragment>
+            )}
+
+            {tab === 'missions' && (
+              <React.Fragment>
+                <div className="section-label"><span>Active Missions</span><span>{missions.filter(m=>m.status!=='Completed').length} active</span></div>
+                <div className="mission-list">
+                  {missions.map(m => (
+                    <div key={m.id} className="mission-item">
+                      <span className="mission-name">{m.name}</span>
+                      <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                        <span className={`mission-status status-${m.status.toLowerCase()}`} onClick={() => cycleMissionStatus(m.id)} style={{ cursor: 'pointer' }} title="Tap to cycle status">
+                          {m.status}
+                        </span>
+                        <span className="entry-action danger" style={{ opacity: 1, padding: 0 }} onClick={() => deleteMission(m.id)}>✕</span>
+                      </div>
+                    </div>
+                  ))}
+                  <div className="mission-add">
+                    <input className="mission-input" placeholder="New mission name..." value={newMissionName} onChange={e => setNewMissionName(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') addMission(); }} />
+                    <button className="btn btn-mission" onClick={addMission}>Add</button>
+                  </div>
+                </div>
+              </React.Fragment>
+            )}
+
+            {tab === 'nightly' && (
+              <React.Fragment>
+                <div className="nightly-zone">
+                  <div className="capture-btns" style={{ marginBottom: 10 }}>
+                    <button className="btn btn-primary" onClick={runNightlyCompile} disabled={nightlyLoading}>
+                      {nightlyLoading ? 'Compiling...' : '⟳ Generate Nightly'}
+                    </button>
+                    <button className="btn btn-ghost" onClick={() => {
+                      setNightlyOutput(`🌙 Nightly Report — ${dateStr()}\n\nDay Status: Closed\n\nTRS Structural Log:\n\nMilestone: Day Open — Met\n\nMoment: Early Morning Sequence — Loop Closed\n\nKey Markers:\n\nER Arc:\n\nPattern Recognition:\n\nMission Layer:\n\nOpen Loops:\n\nClosing Assessment:`);
+                      setNightlyStatus('Template loaded. Edit manually.');
+                    }}>Template</button>
+                  </div>
+                  <div className={`nightly-status${nightlyLoading ? ' nightly-loading' : ''}`}>
+                    {nightlyLoading ? 'Running compile passes...' : nightlyStatus}
+                  </div>
+                  <textarea className="nightly-output" value={nightlyOutput} onChange={e => setNightlyOutput(e.target.value)} placeholder="Nightly Report will appear here after compile..." style={{ marginTop: 8 }} />
+                  <div className="nightly-actions">
+                    <button className="btn btn-primary" onClick={saveNightly}>Save Nightly</button>
+                    <button className={`btn btn-ghost${copyFlash === 'nightly' ? ' copy-flash' : ''}`} onClick={() => copyToClipboard(nightlyOutput, 'nightly')}>
+                      {copyFlash === 'nightly' ? 'Copied!' : 'Copy'}
+                    </button>
+                  </div>
+                </div>
+                {nightlies.length > 0 && (
+                  <React.Fragment>
+                    <div className="section-label"><span>Saved Nightlies</span><span>{nightlies.length}</span></div>
+                    <div className="nightly-saved-list">
+                      {nightlies.map(n => (
+                        <div key={n.id} className="nightly-saved-item" onClick={() => { setNightlyOutput(n.content); setNightlyStatus(`Loaded: ${n.date}`); }}>
+                          <div className="nightly-saved-date">{n.date}</div>
+                          <div className="nightly-saved-preview">{n.content.slice(0, 80)}...</div>
+                        </div>
+                      ))}
+                    </div>
+                  </React.Fragment>
+                )}
+              </React.Fragment>
+            )}
+
+            {tab === 'rehydrate' && (
+              <div className="rehydration-zone">
+                <div className="rehydration-type-btns">
+                  <button className={`rehydration-type-btn${rehydType === 'hydration' ? ' selected' : ''}`} onClick={() => setRehydType('hydration')}>Hydration (New Thread)</button>
+                  <button className={`rehydration-type-btn${rehydType === 'rehydration' ? ' selected' : ''}`} onClick={() => setRehydType('rehydration')}>Rehydration (Current)</button>
+                </div>
+                <div className="capture-btns" style={{ marginBottom: 10 }}>
+                  <button className="btn btn-primary" onClick={generateRehydration}>Generate Prompt</button>
+                </div>
+                <textarea className="rehydration-output" value={rehydOutput} onChange={e => setRehydOutput(e.target.value)} placeholder="Generate prompt, then copy to target node..." />
+                <div className="nightly-actions" style={{ marginTop: 10 }}>
+                  <button className={`btn btn-primary${copyFlash === 'rehydrate' ? ' copy-flash' : ''}`} onClick={() => copyToClipboard(rehydOutput, 'rehydrate')}>
+                    {copyFlash === 'rehydrate' ? 'Copied!' : 'Copy Prompt'}
+                  </button>
+                </div>
+                <div className="nightly-status" style={{ marginTop: 8 }}>
+                  Nightlies loaded: {nightlies.length} · Missions: {missions.filter(m=>m.status!=='Completed').length} active
+                </div>
+              </div>
+            )}
+          </div>
+
+          {showERModal && (
+            <div className="modal-overlay" onClick={() => setShowERModal(false)}>
+              <div className="modal" onClick={e => e.stopPropagation()}>
+                <div className="modal-title">Log ER</div>
+                <input className="modal-input" value={erInput} onChange={e => setErInput(e.target.value)} placeholder="e.g. 1.75B" autoFocus onKeyDown={e => { if (e.key === 'Enter') handleERSubmit(); if (e.key === 'Escape') setShowERModal(false); }} />
+                <div className="modal-btns">
+                  <button className="btn btn-ghost" onClick={() => setShowERModal(false)}>Cancel</button>
+                  <button className="btn btn-primary" onClick={handleERSubmit}>Log</button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {showMomentModal && (
+            <div className="modal-overlay" onClick={() => setShowMomentModal(false)}>
+              <div className="modal" onClick={e => e.stopPropagation()}>
+                <div className="modal-title">Open Moment</div>
+                <div className="moment-type-btns">
+                  <button className={`moment-type-btn${momentType==='temporal'?' selected':''}`} onClick={() => setMomentType('temporal')}>Temporal</button>
+                  <button className={`moment-type-btn${momentType==='mission'?' selected':''}`} onClick={() => setMomentType('mission')}>Mission/Event</button>
+                </div>
+                <input className="modal-input" value={momentName} onChange={e => setMomentName(e.target.value)} placeholder="e.g. Morning Sequence" autoFocus onKeyDown={e => { if (e.key === 'Enter') handleMomentModalSubmit(); if (e.key === 'Escape') setShowMomentModal(false); }} />
+                <div className="modal-btns">
+                  <button className="btn btn-ghost" onClick={() => setShowMomentModal(false)}>Cancel</button>
+                  <button className="btn btn-primary" onClick={handleMomentModalSubmit}>Open</button>
+                </div>
+              </div>
+            </div>
+          )}
+        </React.Fragment>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<SpexV4 />);
+  </script>
+</body>
+</html>
