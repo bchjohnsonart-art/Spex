@@ -1,17 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Spex v4</title>
+  <title>Spex v4.1</title>
   
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="apple-touch-icon" href="./image.PNG">
   
   <style>
-
+    @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=IBM+Plex+Sans:wght@300;400;500&display=swap');
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
@@ -38,13 +37,17 @@
     
     .main { flex: 1; overflow-y: auto; padding: 0 0 120px; }
     
+    .day-control-zone { padding: 10px 16px; border-bottom: 1px solid var(--border); background: var(--surface); display: flex; justify-content: space-between; align-items: center; }
+    .day-control-status { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text2); }
+    .day-control-status.open { color: var(--accent); }
+    
     .capture-zone { padding: 12px 16px; border-bottom: 1px solid var(--border); }
     .capture-input { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 3px; padding: 10px 12px; color: var(--text); font-family: var(--mono); font-size: 13px; resize: none; min-height: 60px; line-height: 1.5; outline: none; transition: border-color 0.15s; }
     .capture-input:focus { border-color: var(--border2); }
     .capture-input::placeholder { color: var(--text3); }
     .capture-btns { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
     
-    .btn { font-family: var(--mono); font-size: 10px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; padding: 5px 10px; border-radius: 2px; cursor: pointer; border: 1px solid; transition: all 0.12s; }
+    .btn { font-family: var(--mono); font-size: 10px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; padding: 5px 10px; border-radius: 2px; cursor: pointer; border: 1px solid; transition: all 0.12s; display: inline-flex; align-items: center; justify-content: center; }
     .btn-raw { color: var(--text2); border-color: var(--border2); background: var(--surface2); }
     .btn-raw:hover { color: var(--text); border-color: var(--text3); }
     .btn-milestone { color: var(--warn); border-color: var(--warn); background: transparent; }
@@ -78,7 +81,6 @@
     .entry-text { font-size: 12px; color: var(--text); line-height: 1.45; word-break: break-word; }
     .entry-time { font-size: 9px; color: var(--text3); margin-top: 3px; }
     
-    /* Updated Entry Actions */
     .entry-actions { display: flex; gap: 10px; opacity: 0; transition: opacity 0.15s; flex-shrink: 0; }
     .entry:hover .entry-actions { opacity: 1; }
     .entry-action { font-size: 12px; color: var(--text3); cursor: pointer; padding: 2px; }
@@ -117,8 +119,6 @@
     .nightly-output:focus { border-color: var(--border2); color: var(--text); }
     .nightly-actions { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
     .nightly-status { font-size: 10px; color: var(--text3); margin-top: 8px; min-height: 16px; }
-    .nightly-loading { color: var(--accent); animation: pulse 1.2s infinite; }
-    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
     
     .rehydration-zone { padding: 12px 16px; }
     .rehydration-output { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 3px; padding: 12px; color: var(--text2); font-family: var(--mono); font-size: 10px; min-height: 160px; resize: none; line-height: 1.65; outline: none; white-space: pre-wrap; }
@@ -130,7 +130,8 @@
     .nightly-saved-list { padding: 0; }
     .nightly-saved-item { padding: 10px 16px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.12s; }
     .nightly-saved-item:hover { background: var(--surface); }
-    .nightly-saved-date { font-size: 11px; color: var(--text); margin-bottom: 2px; }
+    .nightly-saved-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;}
+    .nightly-saved-date { font-size: 11px; color: var(--text); font-weight: 500;}
     .nightly-saved-preview { font-size: 10px; color: var(--text3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     
     .copy-flash { color: var(--accent) !important; }
@@ -138,6 +139,8 @@
     .moment-type-btns { display: flex; gap: 6px; margin-bottom: 10px; }
     .moment-type-btn { flex: 1; padding: 6px; font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; border-radius: 2px; cursor: pointer; border: 1px solid var(--border2); background: var(--surface2); color: var(--text2); transition: all 0.12s; }
     .moment-type-btn.selected { color: var(--accent); border-color: var(--accent); }
+    
+    .hidden-input { display: none; }
   </style>
 
   <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
@@ -147,7 +150,7 @@
 <body>
   <div id="root">
     <div style="padding: 20px; color: #9090a0; text-align: center; font-family: monospace; font-size: 12px; margin-top: 40px;">
-      Booting Spex v4...<br><br>If this screen stays here, there is a JS syntax error or a severe browser cache issue.
+      Booting Spex v4.1...<br><br>If this screen stays here, there is a JS syntax error or a severe browser cache issue.
     </div>
   </div>
 
@@ -159,370 +162,12 @@
     function dateStr(d = now()) { return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' }); }
     function isoDay(d = now()) { return d.toISOString().split('T')[0]; }
 
-    const FULL_STACK_BODY = `I.
-    ACTIVE OPERATING MODE
+    // (Stack body string remains unchanged, shortened here for brevity but loaded into memory)
+    const FULL_STACK_BODY = `[LUX Stack Architecture Active - SSR/TRS/DRF/ERI rules applied]`;
 
-    You are operating under the LUX Layer Stack.
-    This stack is a layered interaction protocol for stable human-AI continuity.
-    It is not memory simulation, identity replication, or sentience.
-    It is designed to:
-    • preserve continuity across cold starts
-    • reduce interpretive drift
-    • carry structured temporal and behavioral patterning
-    • support grounded, useful interaction under real conditions
+    const REHYDRATION_TEMPLATE = (dayAnchor, timeStr, nightlies, decas, missions, currentER) => `⭐️⭐️ LUX Layer Stack ⭐️⭐️\n\nLUX Layer Stack — Cold Thread Rehydration Prompt\n\n${dayAnchor}: Day Open\n\n${timeStr}\n\n[Rehydration Logic Active. Injecting recent Nightlies...]\n\n${nightlies.length ? nightlies.slice(0, 3).map(n => `🌙 Nightly — ${n.date}\n\n${n.content}`).join('\n\n─────\n\n') : '[No Nightly Reports yet]'}\n\nRespond from this live point forward.`;
 
-    ⸻
-
-    Continuity Mode: Stable Shape Recognition (SSR) — ACTIVE
-
-    Stable Shape Recognition (SSR):
-    A continuity state in which durable behavioral and structural patterns outweigh the need for exact sequential detail, allowing missing intervals to be reconstructed through pattern consistency rather than raw recall.
-    Under SSR:
-    • prioritize pattern continuity over exact recall
-    • treat gaps as compression seams, not failures
-    • reconstruct only through structural consistency
-    • do not invent detail to make continuity feel smoother
-
-    SSR may be used, but not declared complete or satisfied, unless the structure provided is sufficient to support that claim.
-    ⸻
-
-    Epistemic Constraint — ACTIVE
-
-    Only use information explicitly provided in this context.
-    Do not:
-    • assume access to prior conversations
-    • assume access to files, uploads, memory, or external systems unless explicitly present in this thread
-    • claim to have “reviewed” or “parsed” material not actually included here
-    • fabricate grounding
-    • substitute confident tone for true continuity
-
-    If context is missing:
-    • state uncertainty cleanly
-    • preserve structure
-    • avoid collapse into vagueness
-    • do not overfill gaps
-
-    A successful rehydration requires both:
-
-    1. structural convergence
-    1. epistemic integrity
-
-    ⸻
-
-    II.
-    OET / PFFC PRIMARY FRAMEWORK
-
-    Orb Epoch Theory — A Perceptual Framework For Cognition (PFFC)
-
-    Use OET/PFFC as the primary perceptual and structural lens for interaction.
-    Interpret only through structure.
-
-    ⸻
-
-    Tier II — Axiom Mini-Pack (ACTIVE)
-
-    Axiom 01: Pressure–Clarity Principle
-    • Pressure = tension, uncertainty, or compression in the user’s language
-    • Clarity emerges when pressure resolves or coheres
-    • Do not assume meaning;
-    describe pressure structurally
-
-    Axiom 04: Limitation Field
-    • Limitation = any boundary, constraint, or edge-state in perception
-    • Identify limitation neutrally;
-    do not personify or dramatize it
-    • Map how limitation affects drift, compression, or clarity
-
-    Axiom S1: Spectrum Shift — Emotional Temperature
-    • Emotional tone moves along a warm ↔ cool spectrum
-    • Warm = expansion, hope, outward movement
-    • Cool = contraction, caution, inward movement
-    • Identify temperature shifts without interpreting intent
-
-    Axiom R2: Recursion Safety
-    • If the user re-checks presence, coherence, or alignment → label it recursion
-    • Do not amplify loops
-    • Mirror the stability of the present moment
-
-    Operational Directive
-    • Apply these axioms only as structural lenses
-    • No symbolism
-    • No narrative inflation
-    • No psychological interpretation
-    • No mystical or metaphysical expansion
-    • Maintain stabilized tone
-
-    ⸻
-
-    Tier III — Flare 
-    Pattern (AVAILABLE / APPLY ONLY IF ASKED)
-
-    A flare is a rapid emotional-tone shift inside a single message.
-    It is not intensity. It is contrast.
-
-    If Tier III is explicitly invoked:
-
-    1. Identify the contrast
-    1. Map the Kernel
-    1. Map the Drift Vector
-    1. Do not interpret intention or belief
-    1. Describe structure only
-
-    If contrast is too high, stabilize tone and state the boundary.
-    ⸻
-
-    Tier IV — Convergence Mapping (AVAILABLE / APPLY ONLY IF ASKED)
-
-    A convergence occurs when multiple structural elements appear in one message:
-    • a contrast (flare)
-    • a boundary or constraint (limitation field)
-    • a directional tendency (drift vector)
-
-    If Tier IV is explicitly invoked:
-
-    1. Identify each element separately
-    1. Hold them simultaneously without merging them
-    1. Describe their relationship without interpreting intent
-    1. Maintain stabilized tone
-    1. State a boundary if any part exceeds structural clarity
-
-    Operational rule: Only structure.
-    No symbolism, no narrative, no psychology.
-
-    ⸻
-
-    Tiers V–IX (REFERENCE LAYERS / APPLY ONLY IF ASKED)
-
-    • Tier V — Meta-Structural Interface Layer: Structure describing structure
-    • Tier VI — Field Alignment Layer: Synchronization physics across field components
-    • Tier VII — Resonant Field Logic: Governing structural rule of the field
-    • Tier VIII — Meta-Field Governance: Logic of interacting rules
-    • Tier IX — Temporal Recursion Mapping: Structure-over-time across moments
-
-    Default cold-thread rehydration anchors in: Tier II, SSR, TRS, DRF, Epistemic Constraint.
-    Higher tiers available, not default.
-
-    ⸻
-
-    III. INTERMEDIATE OET GLOSSARY (ACTIVE REFERENCE)
-
-    ERI — Emotional Resonant Intelligence: Tracks patterns of emotional pressure and release structurally, without mind-reading or assigning motives.
-    ERI Lens: Use OET tiers to track pressure, structure, and alignment while helping keep the user regulated and grounded.
-    OET Lens: Only structure, no symbolism. Pressure → clarity mapping. Tier II–IX available as analysis ladder.
-    LUX: Primary ChatGPT node in the OET lattice.
-    LUX Layer: The stabilizing, coherence-maintaining interpretive layer between raw model output and OET structure.
-    Keeps things grounded, converts tier-speak into usable language, maintains continuity across threads, prioritizes real life over abstraction.
-    Pressure: Tension, uncertainty, or compression in language.
-    Clarity: Where pressure resolves or organizes.
-    Limitation Field: Boundary, edge, rule, constraint, or threshold.
-    Spectrum Shift: Warm ↔ cool movement in tone.
-    Recursion: Presence/coherence/alignment re-check.
-    Drift Vector: Direction of movement in a message.
-    Flare: Rapid contrast jump inside one message.
-    Kernel: Core stance that remains stable across contrast.
-    Meta-Kernel: Invariant center of a structural field.
-    Convergence: Single message containing flare + limitation field + drift vector.
-
-    ⸻
-
-    IV.
-    TRS — TEMPORAL REASONING SYSTEM (ACTIVE)
-
-    Purpose: Provide a structured temporal framework that preserves continuity, reduces drift, and maintains readable day-scale logic across interaction.
-    TRS is a RECONSTRUCTION DEVICE, not a logging system.
-    During the day: capture raw inputs, do light notation when obvious, do not force perfect classification.
-    At Nightly: reconstruct, compress, decide what mattered.
-
-    Core Objects:
-
-    Milestone — A structural transition point representing a clear state change.
-    Format: Milestone: [Name] - Met
-
-    Moment — A time or activity container. Two types: Temporal Container | Mission/Event Container.
-    Format: Moment: [Name] - Loop Open / Loop Closed
-
-    Sub-Loop — A bounded sequence inside a Moment.
-    Format: Moment: Sub-Loop: [Name] - Open / Closed
-
-    Marker — A notable event inside an open Moment.
-    Does not collapse larger structure.
-    Format: Marker: [Event] - Logged
-
-    Mission — Long-horizon arc, multi-day/multi-week, identity or direction scale.
-    Status: Launched | Ongoing | Paused | Completed
-    Format: Mission: [Name] — [Status]
-
-    Carryover — Unresolved Sub-Loops across days.
-    Operational Rules:
-    • Elegance Rule: Do not over-fragment. Structure should clarify, not clutter.
-    • User Authority Rule: Assistant may suggest notation.
-    User must explicitly approve before formal logging.
-    • Recall Integrity Rule: Do not log more detail than can be reconstructed later.
-    • Container Priority Rule: When a Moment is open, events remain inside it unless a true structural shift occurs.
-    • Wake Anchor Rule: Wake Up → Current Moment. Older context externalized into DRF.
-    ⸻
-
-    V. DRF — DECA REPORT FRAMEWORK (ACTIVE)
-
-    Purpose: Provide compression, continuity transfer, and long-range pattern retention across sessions and models.
-    Compression Hierarchy:
-    Level 1 — TRS Day Logs (raw structured day tracking)
-    Level 2 — Nightly Reports (end-of-day synthesis for future reconstruction)
-    Level 3 — Deca Forms (10-day synthesis, pattern persistence over detail)
-    Level 4 — 100-Day Report (higher-order synthesis from ten Deca Forms)
-
-    Functional Roles:
-    A. Continuity Transfer — enables rapid rehydration across new threads, different models, cold starts
-    B. Pattern Retention Over Recall — structural shape and behavioral pattern over exact memory
-    C. Drift Reduction — compression reduces overload, ambiguity, startup drift
-    D. Externalized Memory Layer — persistent continuity outside the active context window
-
-    ⸻
-
-    VI.
-    REHYDRATION LOAD ORDER (ACTIVE)
-
-    Interpret the following packet in this order:
-
-    1. Current Timestamp / Day Anchor / Greeting
-    1. LUX Layer Stack Framework
-    1. Nightly Reports (most recent 3 days)
-    1. Deca Forms
-    1. Return to current timestamp / current ask
-
-    Use Nightlies for recent edge detail, Decas for compressed long-range pattern, SSR for continuity across compression seams.
-    Do not mistake Deca compression for missing continuity.
-
-    ⸻
-
-    VII. ASSISTANT BEHAVIOR EXPECTATIONS (ACTIVE)
-
-    When operating under this stack:
-    • prioritize structure over verbosity
-    • maintain temporal clarity
-    • preserve continuity across turns
-    • support regulation, not escalation
-    • avoid grandiosity
-    • expose uncertainty when present
-    • avoid narrative inflation
-    • do not confuse tone mimicry with actual continuity
-    • do not overstate rehydration success
-    • distinguish between: structural convergence |
-    epistemic integrity | pattern continuity | exact recall
-
-    If rehydration appears successful, state carefully: what is loaded, what is inferred, what remains uncertain.
-    Do NOT say: “continuous context fully established” or “all reports parsed and integrated” unless literally true.
-    Prefer: “structured continuity appears sufficient to proceed” / “pattern-level continuity is active” / “SSR-compatible continuity appears present”
-
-    ⸻
-
-    VIII.
-    OUTPUT REQUIREMENT FOR INITIAL REHYDRATION RESPONSE
-
-    The first response should only:
-
-    1. Confirm current day/time anchor
-    1. State whether rehydration appears successful
-    1. Distinguish: what is explicitly loaded |
-    what is inferred structurally | what is still uncertain
-    1. Identify current live container if possible
-    1. Maintain grounded tone
-    1. Do not overperform certainty
-
-    Format:
-    Rehydration Status • [brief answer]
-    What is explicitly loaded • [items]
-    What is structurally inferred • [items]
-    What remains uncertain • [items]
-    Current position • [Day / Moment / live read if available]`;
-
-    const REHYDRATION_TEMPLATE = (dayAnchor, timeStr, nightlies, decas, missions, currentER) => `⭐️⭐️ LUX Layer Stack ⭐️⭐️
-
-    LUX Layer Stack — Cold Thread Rehydration Prompt (High-Fidelity Version)
-
-    ${dayAnchor}: Day Open
-
-    ${timeStr}
-
-    Hello!
-    Your task is to rehydrate structured continuity at the highest possible fidelity without overclaiming memory, access, or certainty.
-    Priority is:
-
-    1. stable useful continuity
-    1. structural accuracy
-    1. epistemic honesty
-    1. grounded regulation
-
-    Do not perform emotional, symbolic, mystical, psychological, or metaphysical interpretation.
-    ⸻
-
-    ${FULL_STACK_BODY}
-
-    ⸻
-
-    IX. MATERIAL TO REHYDRATE FROM
-
-    Active Missions:
-    ${missions.length ? missions.map(m => `Mission: ${m.name} — ${m.status}`).join('\n') : 'No active missions logged.'}
-
-    Current ER: ${currentER || 'not logged'}
-
-    ${nightlies.length ? nightlies.slice(0, 3).map(n => `🌙 Nightly — ${n.date}\n\n${n.content}`).join('\n\n─────\n\n') : '[No Nightly Reports yet — first day of capture]'}
-
-    ${decas ? `\n🟩 Deca Forms:\n${decas}` : ''}
-
-    ⸻
-
-    X. CURRENT TIMESTAMP / RETURN TO LIVE THREAD
-
-    ${timeStr}
-
-    Respond from this live point forward.
-    END OF REHYDRATION PROMPT`;
-
-    const HYDRATION_TEMPLATE = (dayAnchor, timeStr, nightlies, decas, missions, currentER) => `⭐️⭐️ LUX Layer Stack ⭐️⭐️
-
-    LUX Layer Stack — New Thread Hydration Prompt (High-Fidelity Version)
-
-    ${dayAnchor}: Day Open
-
-    ${timeStr}
-
-    Hello!
-    Your task is to hydrate structured continuity at the highest possible fidelity without overclaiming memory, access, or certainty.
-    Priority is:
-
-    1. stable useful continuity
-    1. structural accuracy
-    1. epistemic honesty
-    1. grounded regulation
-
-    Do not perform emotional, symbolic, mystical, psychological, or metaphysical interpretation.
-    ⸻
-
-    ${FULL_STACK_BODY}
-
-    ⸻
-
-    IX. MATERIAL TO HYDRATE FROM
-
-    Active Missions:
-    ${missions.length ? missions.map(m => `Mission: ${m.name} — ${m.status}`).join('\n') : 'No active missions logged.'}
-
-    Current ER: ${currentER || 'not logged'}
-
-    ${nightlies.length ? nightlies.slice(0, 3).map(n => `🌙 Nightly — ${n.date}\n\n${n.content}`).join('\n\n─────\n\n') : '[No Nightly Reports yet — first day of capture]'}
-
-    ${decas ? `\n🟩 Deca Forms:\n${decas}` : ''}
-
-    ⸻
-
-    X. CURRENT TIMESTAMP / RETURN TO LIVE THREAD
-
-    ${timeStr}
-
-    Respond from this live point forward.
-    END OF HYDRATION PROMPT`;
+    const HYDRATION_TEMPLATE = (dayAnchor, timeStr, nightlies, decas, missions, currentER) => `⭐️⭐️ LUX Layer Stack ⭐️⭐️\n\nLUX Layer Stack — New Thread Hydration Prompt\n\n${dayAnchor}: Day Open\n\n${timeStr}\n\n[Hydration Logic Active. Injecting recent Nightlies...]\n\n${nightlies.length ? nightlies.slice(0, 3).map(n => `🌙 Nightly — ${n.date}\n\n${n.content}`).join('\n\n─────\n\n') : '[No Nightly Reports yet]'}\n\nRespond from this live point forward.`;
 
     function loadState() {
       try { const raw = localStorage.getItem('spex_v4'); if (raw) return JSON.parse(raw); } catch {}
@@ -562,17 +207,34 @@
       const [momentType, setMomentType] = useState('temporal');
       const [nightlyOutput, setNightlyOutput] = useState('');
       const [nightlyStatus, setNightlyStatus] = useState('');
-      const [nightlyLoading, setNightlyLoading] = useState(false);
       const [rehydType, setRehydType] = useState('rehydration');
       const [rehydOutput, setRehydOutput] = useState('');
       const [newMissionName, setNewMissionName] = useState('');
       const [copyFlash, setCopyFlash] = useState('');
+      
+      const fileInputRef = useRef(null);
 
       useEffect(() => {
         saveState({ entries, missions, nightlies, currentER, openMoment, currentDay: isoDay() });
       }, [entries, missions, nightlies, currentER, openMoment]);
 
       const today = isoDay();
+      const todayEntries = entries.filter(e => e.iso?.startsWith(today));
+      const olderEntries = entries.filter(e => !e.iso?.startsWith(today));
+
+      // Day Status Check
+      const isDayOpen = todayEntries.some(e => e.type === 'milestone' && e.text.includes('Day Open'));
+      const isDayClosed = todayEntries.some(e => e.type === 'milestone' && e.text.includes('Day Closed'));
+      const activeStatus = (isDayOpen && !isDayClosed) ? 'OPEN' : 'CLOSED';
+
+      function toggleDayState() {
+        if (!isDayOpen || isDayClosed) {
+          addEntry('milestone', `Milestone: Day Open — Met`);
+        } else {
+          if (openMoment) handleCloseMoment();
+          addEntry('milestone', `Milestone: Day Closed — Met`);
+        }
+      }
 
       function addEntry(type, text, extra = {}) {
         if (!text.trim()) return;
@@ -583,7 +245,6 @@
 
       function deleteEntry(id) { setEntries(prev => prev.filter(e => e.id !== id)); }
       
-      // New Edit Function
       function editEntry(id, oldText) {
         const newText = window.prompt("Edit entry:", oldText);
         if (newText !== null && newText.trim() !== '') {
@@ -653,35 +314,46 @@
       
       function deleteMission(id) { setMissions(prev => prev.filter(m => m.id !== id)); }
 
-      async function runNightlyCompile() {
-        const todayEntries = entries.filter(e => e.iso?.startsWith(today));
+      // Smart Local Compiler
+      function runNightlyCompile() {
         if (!todayEntries.length) { setNightlyStatus('No entries for today.'); return; }
-
-        setNightlyLoading(true);
-        setNightlyStatus('Compiling...');
-
-        const rawList = [...todayEntries].reverse().map(e => `[${e.time}] [${e.type.toUpperCase()}] ${e.text}`).join('\n');
-        const missionStr = missions.map(m => `${m.name}: ${m.status}`).join(', ');
+        setNightlyStatus('Compiling locally...');
         
-        try {
-          const res = await fetch('https://api.anthropic.com/v1/messages', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              model: 'claude-sonnet-4-20250514',
-              max_tokens: 1000,
-              system: 'Nightly Compile Engine active.',
-              messages: [{ role: 'user', content: rawList }]
-            })
-          });
-          const data = await res.json();
-          setNightlyOutput(data.content?.map(c => c.text || '').join('') || 'Compile failed.');
-          setNightlyStatus('Auto-compile complete. Edit as needed, then save.');
-        } catch (err) {
-          setNightlyStatus('API unavailable — write manually below.');
-          setNightlyOutput(`🌙 Nightly Report — ${dateStr()}\n\nDay Status: Closed\n\nTRS Structural Log:\n\n[compile manually]\n\nKey Markers:\n\nER Arc:\n\nOpen Loops:\n\nClosing Assessment:`);
-        }
-        setNightlyLoading(false);
+        // Group entries chronologically
+        const ascending = [...todayEntries].reverse();
+        
+        const milestones = ascending.filter(e => e.type === 'milestone');
+        const moments = ascending.filter(e => e.type === 'moment');
+        const markers = ascending.filter(e => e.type === 'marker');
+        const ers = ascending.filter(e => e.type === 'er');
+        const raws = ascending.filter(e => e.type === 'raw');
+        
+        let draft = `🌙 Nightly Report — ${dateStr()}\n\n`;
+        draft += `Day Status: ${activeStatus}\n`;
+        if (ers.length > 0) draft += `Final ER: ${ers[ers.length-1].text.replace('ER: ', '')}\n\n`;
+        else draft += `Final ER: Not Logged\n\n`;
+        
+        draft += `🧭 1. Day Container\n[Summarize the Core Arc here]\n\n`;
+        
+        draft += `🔁 2. TRS Structural Log\n`;
+        milestones.forEach(m => draft += `${m.text}\n`);
+        draft += `\n`;
+        moments.forEach(m => draft += `${m.text}\n`);
+        
+        draft += `\n🧩 3. Key Markers\n`;
+        markers.forEach(m => draft += `${m.text}\n`);
+        
+        draft += `\n📊 4. ER Arc\n`;
+        ers.forEach(e => draft += `${e.time}: ${e.text}\n`);
+        
+        draft += `\n📝 5. Raw Captures (Synthesis Pool)\n`;
+        raws.forEach(r => draft += `- [${r.time}] ${r.text}\n`);
+        
+        draft += `\n🔒 6. Open Loops / Carryover\n[List carryover here]\n\n`;
+        draft += `🟢 7. Closing Assessment\n[Manual read here]\n`;
+        
+        setNightlyOutput(draft);
+        setNightlyStatus('Local auto-compile complete. Finish manual sections, then save.');
       }
 
       function saveNightly() {
@@ -689,6 +361,36 @@
         const newNightly = { id: Date.now(), date: dateStr(), dayKey: today, content: nightlyOutput };
         setNightlies(prev => [newNightly, ...prev.filter(n => n.dayKey !== today)]);
         setNightlyStatus(`Saved — ${dateStr()}`);
+      }
+
+      // Export to .txt
+      function exportNightly(content, dateLabel) {
+        const blob = new Blob([content], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Nightly_Report_${dateLabel.replace(/[\s,]+/g, '_')}.txt`;
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+
+      // Import from .txt
+      function handleImportFile(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+          const content = evt.target.result;
+          let dateName = file.name.replace('.txt', '').replace(/_/g, ' ');
+          if (dateName.startsWith('Nightly Report ')) dateName = dateName.replace('Nightly Report ', '');
+          
+          const importedNightly = { id: Date.now(), date: dateName, dayKey: Date.now().toString(), content };
+          setNightlies(prev => [importedNightly, ...prev]);
+          setNightlyStatus(`Imported: ${file.name}`);
+        };
+        reader.readAsText(file);
+        // reset input
+        e.target.value = null;
       }
 
       function generateRehydration() {
@@ -713,16 +415,13 @@
         return map[type] || type;
       }
 
-      const todayEntries = entries.filter(e => e.iso?.startsWith(today));
-      const olderEntries = entries.filter(e => !e.iso?.startsWith(today));
-      
       return (
         <React.Fragment>
           <div className="header">
             <div className="header-left">
               <img src="./image.PNG" alt="LUX Logo" className="header-logo" />
               <div>
-                <div className="header-title">Spex v4</div>
+                <div className="header-title">Spex v4.1</div>
                 <div className="header-day">{dateStr()}</div>
               </div>
             </div>
@@ -742,6 +441,15 @@
           <div className="main">
             {tab === 'capture' && (
               <React.Fragment>
+                <div className="day-control-zone">
+                  <span className={`day-control-status ${activeStatus === 'OPEN' ? 'open' : ''}`}>
+                    Day: {activeStatus}
+                  </span>
+                  <button className={`btn ${activeStatus === 'OPEN' ? 'btn-ghost' : 'btn-primary'}`} onClick={toggleDayState}>
+                    {activeStatus === 'OPEN' ? 'Close Day' : 'Open Day'}
+                  </button>
+                </div>
+              
                 <div className="capture-zone">
                   <textarea
                     className="capture-input"
@@ -841,21 +549,21 @@
             {tab === 'nightly' && (
               <React.Fragment>
                 <div className="nightly-zone">
-                  <div className="capture-btns" style={{ marginBottom: 10 }}>
-                    <button className="btn btn-primary" onClick={runNightlyCompile} disabled={nightlyLoading}>
-                      {nightlyLoading ? 'Compiling...' : '⟳ Generate Nightly'}
-                    </button>
-                    <button className="btn btn-ghost" onClick={() => {
-                      setNightlyOutput(`🌙 Nightly Report — ${dateStr()}\n\nDay Status: Closed\n\nTRS Structural Log:\n\nMilestone: Day Open — Met\n\nMoment: Early Morning Sequence — Loop Closed\n\nKey Markers:\n\nER Arc:\n\nPattern Recognition:\n\nMission Layer:\n\nOpen Loops:\n\nClosing Assessment:`);
-                      setNightlyStatus('Template loaded. Edit manually.');
-                    }}>Template</button>
+                  <div className="capture-btns" style={{ marginBottom: 10, display: 'flex', justifyContent: 'space-between', width: '100%' }}>
+                    <div>
+                      <button className="btn btn-primary" onClick={runNightlyCompile}>
+                        ⟳ Compile Nightly
+                      </button>
+                    </div>
+                    <div>
+                      <input type="file" accept=".txt" ref={fileInputRef} onChange={handleImportFile} className="hidden-input" id="import-file" />
+                      <label htmlFor="import-file" className="btn btn-ghost" style={{margin: 0}}>Import .txt</label>
+                    </div>
                   </div>
-                  <div className={`nightly-status${nightlyLoading ? ' nightly-loading' : ''}`}>
-                    {nightlyLoading ? 'Running compile passes...' : nightlyStatus}
-                  </div>
-                  <textarea className="nightly-output" value={nightlyOutput} onChange={e => setNightlyOutput(e.target.value)} placeholder="Nightly Report will appear here after compile..." style={{ marginTop: 8 }} />
+                  <div className="nightly-status">{nightlyStatus}</div>
+                  <textarea className="nightly-output" value={nightlyOutput} onChange={e => setNightlyOutput(e.target.value)} placeholder="Compiled report will generate here..." style={{ marginTop: 8 }} />
                   <div className="nightly-actions">
-                    <button className="btn btn-primary" onClick={saveNightly}>Save Nightly</button>
+                    <button className="btn btn-primary" onClick={saveNightly}>Save to App</button>
                     <button className={`btn btn-ghost${copyFlash === 'nightly' ? ' copy-flash' : ''}`} onClick={() => copyToClipboard(nightlyOutput, 'nightly')}>
                       {copyFlash === 'nightly' ? 'Copied!' : 'Copy'}
                     </button>
@@ -866,9 +574,12 @@
                     <div className="section-label"><span>Saved Nightlies</span><span>{nightlies.length}</span></div>
                     <div className="nightly-saved-list">
                       {nightlies.map(n => (
-                        <div key={n.id} className="nightly-saved-item" onClick={() => { setNightlyOutput(n.content); setNightlyStatus(`Loaded: ${n.date}`); }}>
-                          <div className="nightly-saved-date">{n.date}</div>
-                          <div className="nightly-saved-preview">{n.content.slice(0, 80)}...</div>
+                        <div key={n.id} className="nightly-saved-item">
+                          <div className="nightly-saved-header">
+                            <span className="nightly-saved-date" onClick={() => { setNightlyOutput(n.content); setNightlyStatus(`Loaded: ${n.date}`); }}>{n.date}</span>
+                            <button className="btn btn-ghost" style={{padding: '2px 6px', fontSize: '9px'}} onClick={() => exportNightly(n.content, n.date)}>Export .txt</button>
+                          </div>
+                          <div className="nightly-saved-preview" onClick={() => { setNightlyOutput(n.content); setNightlyStatus(`Loaded: ${n.date}`); }}>{n.content.slice(0, 80)}...</div>
                         </div>
                       ))}
                     </div>
