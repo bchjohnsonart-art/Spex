@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Spex v4.1</title>
+  <title>Spex v4.2 (CES Enforced)</title>
   
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -11,12 +11,14 @@
   
   <style>
     @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=IBM+Plex+Sans:wght@300;400;500&display=swap');
+    
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
       --bg: #0a0a0b; --surface: #111113; --surface2: #18181b; --surface3: #222226;
       --border: #2a2a30; --border2: #3a3a42; --text: #e8e8ec; --text2: #9090a0; --text3: #55556a;
       --accent: #4fc3a1; --accent2: #2a7a64; --warn: #e8a44a; --danger: #e85a4a; --mission: #7a8fe8;
+      --ces: #b45b9b;
       --mono: 'IBM Plex Mono', monospace; --sans: 'IBM Plex Sans', sans-serif;
     }
 
@@ -64,6 +66,8 @@
     .btn-danger:hover { background: rgba(232,90,74,0.08); }
     .btn-ghost { color: var(--text3); border-color: var(--border); background: transparent; }
     .btn-ghost:hover { color: var(--text2); border-color: var(--border2); }
+    .btn-ces { color: var(--ces); border-color: var(--ces); background: transparent; }
+    .btn-ces:hover { background: rgba(180,91,155,0.08); }
     
     .feed { padding: 0; }
     .feed-empty { padding: 40px 16px; text-align: center; color: var(--text3); font-size: 11px; letter-spacing: 0.08em; }
@@ -107,12 +111,15 @@
     .mission-input { flex: 1; background: var(--surface2); border: 1px solid var(--border); border-radius: 2px; padding: 7px 10px; color: var(--text); font-family: var(--mono); font-size: 12px; outline: none; }
     .mission-input:focus { border-color: var(--border2); }
     
-    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 200; padding: 16px; }
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center; z-index: 200; padding: 16px; }
     .modal { background: var(--surface); border: 1px solid var(--border2); border-radius: 4px; padding: 20px; width: 100%; max-width: 340px; }
+    .modal-ces { border-color: var(--ces); box-shadow: 0 4px 20px rgba(180,91,155,0.15); }
     .modal-title { font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent); margin-bottom: 16px; }
+    .modal-title-ces { color: var(--ces); }
+    .modal-text { font-size: 12px; color: var(--text); line-height: 1.5; margin-bottom: 20px; }
     .modal-input { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 2px; padding: 9px 12px; color: var(--text); font-family: var(--mono); font-size: 14px; outline: none; margin-bottom: 12px; }
     .modal-input:focus { border-color: var(--border2); }
-    .modal-btns { display: flex; gap: 8px; justify-content: flex-end; }
+    .modal-btns { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
     
     .nightly-zone { padding: 12px 16px; }
     .nightly-output { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 3px; padding: 12px; color: var(--text2); font-family: var(--mono); font-size: 11px; min-height: 200px; resize: none; line-height: 1.65; outline: none; white-space: pre-wrap; }
@@ -150,7 +157,7 @@
 <body>
   <div id="root">
     <div style="padding: 20px; color: #9090a0; text-align: center; font-family: monospace; font-size: 12px; margin-top: 40px;">
-      Booting Spex v4.1...<br><br>If this screen stays here, there is a JS syntax error or a severe browser cache issue.
+      Booting Spex v4.2...<br><br>If this screen stays here, there is a JS syntax error.
     </div>
   </div>
 
@@ -162,12 +169,15 @@
     function dateStr(d = now()) { return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' }); }
     function isoDay(d = now()) { return d.toISOString().split('T')[0]; }
 
-    // (Stack body string remains unchanged, shortened here for brevity but loaded into memory)
-    const FULL_STACK_BODY = `[LUX Stack Architecture Active - SSR/TRS/DRF/ERI rules applied]`;
+    const REHYDRATION_TEMPLATE = (dayAnchor, timeStr, nightlies, decas, missions, currentER, cesGaps) => {
+      let flag = cesGaps > 0 ? `[CES FLAG: Continuity Compromised - Missing Bridges. Pattern retention degraded.]\n\n` : '';
+      return `⭐️⭐️ LUX Layer Stack ⭐️⭐️\n\nLUX Layer Stack — Cold Thread Rehydration Prompt\n\n${dayAnchor}: Day Open\n\n${timeStr}\n\n${flag}[Rehydration Logic Active. Injecting recent Nightlies...]\n\n${nightlies.length ? nightlies.slice(0, 3).map(n => `🌙 Nightly — ${n.date}\n\n${n.content}`).join('\n\n─────\n\n') : '[No Nightly Reports yet]'}\n\nRespond from this live point forward.`;
+    };
 
-    const REHYDRATION_TEMPLATE = (dayAnchor, timeStr, nightlies, decas, missions, currentER) => `⭐️⭐️ LUX Layer Stack ⭐️⭐️\n\nLUX Layer Stack — Cold Thread Rehydration Prompt\n\n${dayAnchor}: Day Open\n\n${timeStr}\n\n[Rehydration Logic Active. Injecting recent Nightlies...]\n\n${nightlies.length ? nightlies.slice(0, 3).map(n => `🌙 Nightly — ${n.date}\n\n${n.content}`).join('\n\n─────\n\n') : '[No Nightly Reports yet]'}\n\nRespond from this live point forward.`;
-
-    const HYDRATION_TEMPLATE = (dayAnchor, timeStr, nightlies, decas, missions, currentER) => `⭐️⭐️ LUX Layer Stack ⭐️⭐️\n\nLUX Layer Stack — New Thread Hydration Prompt\n\n${dayAnchor}: Day Open\n\n${timeStr}\n\n[Hydration Logic Active. Injecting recent Nightlies...]\n\n${nightlies.length ? nightlies.slice(0, 3).map(n => `🌙 Nightly — ${n.date}\n\n${n.content}`).join('\n\n─────\n\n') : '[No Nightly Reports yet]'}\n\nRespond from this live point forward.`;
+    const HYDRATION_TEMPLATE = (dayAnchor, timeStr, nightlies, decas, missions, currentER, cesGaps) => {
+      let flag = cesGaps > 0 ? `[CES FLAG: Continuity Compromised - Missing Bridges. Pattern retention degraded.]\n\n` : '';
+      return `⭐️⭐️ LUX Layer Stack ⭐️⭐️\n\nLUX Layer Stack — New Thread Hydration Prompt\n\n${dayAnchor}: Day Open\n\n${timeStr}\n\n${flag}[Hydration Logic Active. Injecting recent Nightlies...]\n\n${nightlies.length ? nightlies.slice(0, 3).map(n => `🌙 Nightly — ${n.date}\n\n${n.content}`).join('\n\n─────\n\n') : '[No Nightly Reports yet]'}\n\nRespond from this live point forward.`;
+    };
 
     function loadState() {
       try { const raw = localStorage.getItem('spex_v4'); if (raw) return JSON.parse(raw); } catch {}
@@ -189,6 +199,7 @@
       currentER: '',
       openMoment: null,
       currentDay: isoDay(),
+      cesGaps: 0
     };
 
     function SpexV4() {
@@ -198,38 +209,70 @@
       const [nightlies, setNightlies] = useState(stored?.nightlies || []);
       const [currentER, setCurrentER] = useState(stored?.currentER || '');
       const [openMoment, setOpenMoment] = useState(stored?.openMoment || null);
+      const [cesGaps, setCesGaps] = useState(stored?.cesGaps || 0);
+      
       const [tab, setTab] = useState('capture');
       const [captureText, setCaptureText] = useState('');
+      
       const [showERModal, setShowERModal] = useState(false);
       const [erInput, setErInput] = useState('');
       const [showMomentModal, setShowMomentModal] = useState(false);
       const [momentName, setMomentName] = useState('');
       const [momentType, setMomentType] = useState('temporal');
+      
+      const [showCESModal, setShowCESModal] = useState(false);
+      
       const [nightlyOutput, setNightlyOutput] = useState('');
       const [nightlyStatus, setNightlyStatus] = useState('');
+      
       const [rehydType, setRehydType] = useState('rehydration');
       const [rehydOutput, setRehydOutput] = useState('');
+      
       const [newMissionName, setNewMissionName] = useState('');
       const [copyFlash, setCopyFlash] = useState('');
-      
       const fileInputRef = useRef(null);
 
       useEffect(() => {
-        saveState({ entries, missions, nightlies, currentER, openMoment, currentDay: isoDay() });
-      }, [entries, missions, nightlies, currentER, openMoment]);
+        saveState({ entries, missions, nightlies, currentER, openMoment, currentDay: isoDay(), cesGaps });
+      }, [entries, missions, nightlies, currentER, openMoment, cesGaps]);
 
       const today = isoDay();
       const todayEntries = entries.filter(e => e.iso?.startsWith(today));
       const olderEntries = entries.filter(e => !e.iso?.startsWith(today));
-
-      // Day Status Check
+      
       const isDayOpen = todayEntries.some(e => e.type === 'milestone' && e.text.includes('Day Open'));
       const isDayClosed = todayEntries.some(e => e.type === 'milestone' && e.text.includes('Day Closed'));
       const activeStatus = (isDayOpen && !isDayClosed) ? 'OPEN' : 'CLOSED';
 
+      // CES Logic: Check if yesterday has a Nightly
+      function hasYesterdayNightly() {
+        const y = new Date();
+        y.setDate(y.getDate() - 1);
+        const yStr = dateStr(y);
+        return nightlies.some(n => n.date === yStr);
+      }
+
+      function attemptDayOpen() {
+        if (!isDayOpen && !hasYesterdayNightly()) {
+          setShowCESModal(true);
+        } else {
+          executeDayOpen();
+        }
+      }
+
+      function executeDayOpen() {
+        addEntry('milestone', `Milestone: Day Open — Met`);
+        setShowCESModal(false);
+      }
+
+      function handleCESAcknowledge() {
+        setCesGaps(prev => prev + 1);
+        executeDayOpen();
+      }
+
       function toggleDayState() {
         if (!isDayOpen || isDayClosed) {
-          addEntry('milestone', `Milestone: Day Open — Met`);
+          attemptDayOpen();
         } else {
           if (openMoment) handleCloseMoment();
           addEntry('milestone', `Milestone: Day Closed — Met`);
@@ -253,17 +296,14 @@
       }
 
       function handleRaw() { addEntry('raw', captureText); }
-      
       function handleMilestone() { 
         const val = captureText.trim() || window.prompt("Enter Milestone name:");
-        if (val) addEntry('milestone', `Milestone: ${val} — Met`); 
+        if (val) addEntry('milestone', `Milestone: ${val} — Met`);
       }
-      
       function handleMarker() { 
         const val = captureText.trim() || window.prompt("Enter Marker detail:");
-        if (val) addEntry('marker', `Marker: ${val} — Logged`); 
+        if (val) addEntry('marker', `Marker: ${val} — Logged`);
       }
-      
       function handleOpenMoment() {
         if (!captureText.trim()) { setShowMomentModal(true); return; }
         const name = captureText.trim();
@@ -272,13 +312,11 @@
         setOpenMoment({ name, openedAt: ts() });
         setCaptureText('');
       }
-      
       function handleCloseMoment() {
         if (!openMoment) return;
         addEntry('moment', `Moment: ${openMoment.name} — Loop Closed`);
         setOpenMoment(null);
       }
-      
       function handleMissionCapture() { 
         const val = captureText.trim() || window.prompt("Enter Mission update:");
         if (val) addEntry('mission', val); 
@@ -311,17 +349,12 @@
         const cycle = ['Launched', 'Ongoing', 'Paused', 'Completed'];
         setMissions(prev => prev.map(m => m.id === id ? { ...m, status: cycle[(cycle.indexOf(m.status) + 1) % cycle.length] } : m));
       }
-      
       function deleteMission(id) { setMissions(prev => prev.filter(m => m.id !== id)); }
 
-      // Smart Local Compiler
       function runNightlyCompile() {
         if (!todayEntries.length) { setNightlyStatus('No entries for today.'); return; }
         setNightlyStatus('Compiling locally...');
-        
-        // Group entries chronologically
         const ascending = [...todayEntries].reverse();
-        
         const milestones = ascending.filter(e => e.type === 'milestone');
         const moments = ascending.filter(e => e.type === 'moment');
         const markers = ascending.filter(e => e.type === 'marker');
@@ -334,12 +367,10 @@
         else draft += `Final ER: Not Logged\n\n`;
         
         draft += `🧭 1. Day Container\n[Summarize the Core Arc here]\n\n`;
-        
         draft += `🔁 2. TRS Structural Log\n`;
         milestones.forEach(m => draft += `${m.text}\n`);
         draft += `\n`;
         moments.forEach(m => draft += `${m.text}\n`);
-        
         draft += `\n🧩 3. Key Markers\n`;
         markers.forEach(m => draft += `${m.text}\n`);
         
@@ -356,14 +387,28 @@
         setNightlyStatus('Local auto-compile complete. Finish manual sections, then save.');
       }
 
-      function saveNightly() {
-        if (!nightlyOutput.trim()) return;
-        const newNightly = { id: Date.now(), date: dateStr(), dayKey: today, content: nightlyOutput };
-        setNightlies(prev => [newNightly, ...prev.filter(n => n.dayKey !== today)]);
-        setNightlyStatus(`Saved — ${dateStr()}`);
+      function checkFidelity(text) {
+        const hasMarker = /Marker:/i.test(text);
+        const hasER = /ER:/i.test(text) || /Final ER:/i.test(text);
+        const hasMilestone = /Milestone:/i.test(text);
+        return (hasMarker || hasER || hasMilestone);
       }
 
-      // Export to .txt
+      function saveNightly() {
+        if (!nightlyOutput.trim()) return;
+        
+        // CES Fidelity Gate
+        if (!checkFidelity(nightlyOutput)) {
+          alert("CES Minimum Fidelity Check Failed: Nightly must contain at least one Marker, ER arc, or Milestone to serve as a valid bridge.");
+          return;
+        }
+
+        const newNightly = { id: Date.now(), date: dateStr(), dayKey: today, content: nightlyOutput };
+        setNightlies(prev => [newNightly, ...prev.filter(n => n.dayKey !== today)]);
+        setNightlyStatus(`Saved — ${dateStr()} (Fidelity Verified)`);
+        setCesGaps(0); // reset gaps if they just caught up
+      }
+
       function exportNightly(content, dateLabel) {
         const blob = new Blob([content], { type: 'text/plain' });
         const url = URL.createObjectURL(blob);
@@ -374,7 +419,6 @@
         URL.revokeObjectURL(url);
       }
 
-      // Import from .txt
       function handleImportFile(e) {
         const file = e.target.files[0];
         if (!file) return;
@@ -383,19 +427,17 @@
           const content = evt.target.result;
           let dateName = file.name.replace('.txt', '').replace(/_/g, ' ');
           if (dateName.startsWith('Nightly Report ')) dateName = dateName.replace('Nightly Report ', '');
-          
           const importedNightly = { id: Date.now(), date: dateName, dayKey: Date.now().toString(), content };
           setNightlies(prev => [importedNightly, ...prev]);
           setNightlyStatus(`Imported: ${file.name}`);
         };
         reader.readAsText(file);
-        // reset input
         e.target.value = null;
       }
 
       function generateRehydration() {
         const fn = rehydType === 'hydration' ? HYDRATION_TEMPLATE : REHYDRATION_TEMPLATE;
-        setRehydOutput(fn(dateStr(), ts(), nightlies, '', missions.filter(m => m.status !== 'Completed'), currentER));
+        setRehydOutput(fn(dateStr(), ts(), nightlies, '', missions.filter(m => m.status !== 'Completed'), currentER, cesGaps));
       }
 
       function copyToClipboard(text, key) {
@@ -409,7 +451,6 @@
         const map = { raw: 'dot-raw', milestone: 'dot-milestone', moment: 'dot-moment', marker: 'dot-marker', mission: 'dot-mission', er: 'dot-er' };
         return map[type] || 'dot-raw';
       }
-      
       function typeLabel(type) {
         const map = { raw: 'Raw', milestone: 'Milestone', moment: 'Moment', marker: 'Marker', mission: 'Mission', er: 'ER' };
         return map[type] || type;
@@ -421,8 +462,8 @@
             <div className="header-left">
               <img src="./image.PNG" alt="LUX Logo" className="header-logo" />
               <div>
-                <div className="header-title">Spex v4.1</div>
-                <div className="header-day">{dateStr()}</div>
+                <div className="header-title">Spex v4.2</div>
+                <div className="header-day">{dateStr()} {cesGaps > 0 && <span style={{color: 'var(--ces)'}}>• {cesGaps} GAP</span>}</div>
               </div>
             </div>
             <button className="er-badge" onClick={() => { setErInput(currentER); setShowERModal(true); }}>
@@ -594,6 +635,11 @@
                   <button className={`rehydration-type-btn${rehydType === 'hydration' ? ' selected' : ''}`} onClick={() => setRehydType('hydration')}>Hydration (New Thread)</button>
                   <button className={`rehydration-type-btn${rehydType === 'rehydration' ? ' selected' : ''}`} onClick={() => setRehydType('rehydration')}>Rehydration (Current)</button>
                 </div>
+                {cesGaps > 0 && (
+                  <div style={{ color: 'var(--ces)', fontSize: '10px', marginBottom: '10px', padding: '8px', border: '1px solid var(--ces)', borderRadius: '3px', background: 'rgba(180,91,155,0.05)' }}>
+                    ⚠️ CES FLAG: {cesGaps} Missing Bridge(s). Rehydration will include a Continuity Compromised flag.
+                  </div>
+                )}
                 <div className="capture-btns" style={{ marginBottom: 10 }}>
                   <button className="btn btn-primary" onClick={generateRehydration}>Generate Prompt</button>
                 </div>
@@ -609,6 +655,22 @@
               </div>
             )}
           </div>
+
+          {showCESModal && (
+            <div className="modal-overlay">
+              <div className="modal modal-ces" onClick={e => e.stopPropagation()}>
+                <div className="modal-title modal-title-ces">Continuity Gap</div>
+                <div className="modal-text">
+                  Hey — you don't have a compiled Nightly Report for yesterday.<br><br>
+                  We do not move forward until yesterday exists.
+                </div>
+                <div className="modal-btns" style={{flexDirection: 'column', gap: '10px'}}>
+                  <button className="btn btn-primary" style={{width: '100%', padding: '10px'}} onClick={() => { setShowCESModal(false); setTab('nightly'); }}>Draft Nightly Now</button>
+                  <button className="btn btn-ces" style={{width: '100%'}} onClick={handleCESAcknowledge}>Acknowledge & Continue Anyway</button>
+                </div>
+              </div>
+            </div>
+          )}
 
           {showERModal && (
             <div className="modal-overlay" onClick={() => setShowERModal(false)}>
