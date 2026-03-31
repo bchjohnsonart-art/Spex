@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Spex v4.2 (CES Enforced)</title>
+  <title>Spex v4.3 (DRF Synthesis Engine)</title>
   
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -157,7 +157,7 @@
 <body>
   <div id="root">
     <div style="padding: 20px; color: #9090a0; text-align: center; font-family: monospace; font-size: 12px; margin-top: 40px;">
-      Booting Spex v4.2...<br><br>If this screen stays here, there is a JS syntax error.
+      Booting Spex v4.3...<br><br>If this screen stays here, there is a JS syntax error.
     </div>
   </div>
 
@@ -353,49 +353,70 @@
 
       function runNightlyCompile() {
         if (!todayEntries.length) { setNightlyStatus('No entries for today.'); return; }
-        setNightlyStatus('Compiling locally...');
+        setNightlyStatus('Generating Synthesis Prompt...');
         const ascending = [...todayEntries].reverse();
-        const milestones = ascending.filter(e => e.type === 'milestone');
-        const moments = ascending.filter(e => e.type === 'moment');
-        const markers = ascending.filter(e => e.type === 'marker');
-        const ers = ascending.filter(e => e.type === 'er');
-        const raws = ascending.filter(e => e.type === 'raw');
         
-        let draft = `🌙 Nightly Report — ${dateStr()}\n\n`;
-        draft += `Day Status: ${activeStatus}\n`;
-        if (ers.length > 0) draft += `Final ER: ${ers[ers.length-1].text.replace('ER: ', '')}\n\n`;
-        else draft += `Final ER: Not Logged\n\n`;
+        let prompt = `You are the LUX Layer Stack Nightly Compilation Engine.
+Your task is to take the raw, unsorted captures from today and synthesize them into a structurally perfect, fully written Nightly Report. 
+
+DO NOT output templates. DO NOT output placeholders like "[Summarize here]". You must author the entire report based on the provided data. Apply the Dinner Test: only include what matters to the pattern, discard noise. Fix spelling errors and deduplicate identical events. Ensure all Open/Closed pairs match.
+
+REQUIRED FORMAT:
+🌙 Nightly Report — ${dateStr()}
+Day Status: ${activeStatus}
+Final ER: ${ascending.filter(e => e.type === 'er').slice(-1)[0]?.text.replace('ER: ', '') || 'Not Logged'}
+
+1. Day Container
+Type: [Auto-infer from pattern]
+Core Arc: [Write a summary of the day]
+
+2. TRS Structural Log
+[Clean, deduplicated list of Milestones, Moments, and Sub-Loops in chronological order]
+
+3. Key Markers
+[Clean, deduplicated list of meaningful events. Exclude noise.]
+
+4. Major Events / Signals
+[Detect 3-5 meaningful events and write short, structured paragraphs explaining their impact]
+
+5. ER Arc
+[Compress timeline into early/mid/late pattern and identify trend]
+
+6. Pattern Recognition
+[Extract 3-5 patterns from the day in short, reusable statements]
+
+7. Open Loops / Carryover
+[List any loops that were opened but not explicitly closed]
+
+8. Closing Assessment
+[Short paragraph assessing coherence, drift level, and execution quality]
+
+9. Final Line
+[Single compression sentence]
+
+--- RAW DAY DATA FOR SYNTHESIS ---
+`;
         
-        draft += `🧭 1. Day Container\n[Summarize the Core Arc here]\n\n`;
-        draft += `🔁 2. TRS Structural Log\n`;
-        milestones.forEach(m => draft += `${m.text}\n`);
-        draft += `\n`;
-        moments.forEach(m => draft += `${m.text}\n`);
-        draft += `\n🧩 3. Key Markers\n`;
-        markers.forEach(m => draft += `${m.text}\n`);
+        ascending.forEach(e => {
+            prompt += `[${e.time}] [${e.type.toUpperCase()}] ${e.text}\n`;
+        });
         
-        draft += `\n📊 4. ER Arc\n`;
-        ers.forEach(e => draft += `${e.time}: ${e.text}\n`);
-        
-        draft += `\n📝 5. Raw Captures (Synthesis Pool)\n`;
-        raws.forEach(r => draft += `- [${r.time}] ${r.text}\n`);
-        
-        draft += `\n🔒 6. Open Loops / Carryover\n[List carryover here]\n\n`;
-        draft += `🟢 7. Closing Assessment\n[Manual read here]\n`;
-        
-        setNightlyOutput(draft);
-        setNightlyStatus('Local auto-compile complete. Finish manual sections, then save.');
+        setNightlyOutput(prompt);
+        setNightlyStatus('Prompt generated. Copy and send to LLM for final synthesis, then paste result here to Save.');
       }
 
       function checkFidelity(text) {
         const hasMarker = /Marker:/i.test(text);
-        const hasER = /ER:/i.test(text) || /Final ER:/i.test(text);
+        const hasER = /ER:/i.test(text) || /Final ER:/i.test(text) || /Energy Rating:/i.test(text);
         const hasMilestone = /Milestone:/i.test(text);
         return (hasMarker || hasER || hasMilestone);
       }
 
       function saveNightly() {
-        if (!nightlyOutput.trim()) return;
+        if (!nightlyOutput.trim() || nightlyOutput.includes("You are the LUX Layer Stack Nightly Compilation Engine.")) {
+            alert("Please paste the synthesized report from the LLM before saving.");
+            return;
+        }
         
         // CES Fidelity Gate
         if (!checkFidelity(nightlyOutput)) {
@@ -462,7 +483,7 @@
             <div className="header-left">
               <img src="./image.PNG" alt="LUX Logo" className="header-logo" />
               <div>
-                <div className="header-title">Spex v4.2</div>
+                <div className="header-title">Spex v4.3</div>
                 <div className="header-day">{dateStr()} {cesGaps > 0 && <span style={{color: 'var(--ces)'}}>• {cesGaps} GAP</span>}</div>
               </div>
             </div>
@@ -593,7 +614,7 @@
                   <div className="capture-btns" style={{ marginBottom: 10, display: 'flex', justifyContent: 'space-between', width: '100%' }}>
                     <div>
                       <button className="btn btn-primary" onClick={runNightlyCompile}>
-                        ⟳ Compile Nightly
+                        ⟳ Generate Synthesis Prompt
                       </button>
                     </div>
                     <div>
@@ -606,7 +627,7 @@
                   <div className="nightly-actions">
                     <button className="btn btn-primary" onClick={saveNightly}>Save to App</button>
                     <button className={`btn btn-ghost${copyFlash === 'nightly' ? ' copy-flash' : ''}`} onClick={() => copyToClipboard(nightlyOutput, 'nightly')}>
-                      {copyFlash === 'nightly' ? 'Copied!' : 'Copy'}
+                      {copyFlash === 'nightly' ? 'Copied!' : 'Copy Prompt'}
                     </button>
                   </div>
                 </div>
@@ -661,7 +682,7 @@
               <div className="modal modal-ces" onClick={e => e.stopPropagation()}>
                 <div className="modal-title modal-title-ces">Continuity Gap</div>
                 <div className="modal-text">
-                  Hey — you don&apos;t have a compiled Nightly Report for yesterday.<br /><br />
+                  Hey — you don't have a compiled Nightly Report for yesterday.<br /><br />
                   We do not move forward until yesterday exists.
                 </div>
                 <div className="modal-btns" style={{flexDirection: 'column', gap: '10px'}}>
